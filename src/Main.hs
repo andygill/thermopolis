@@ -30,6 +30,14 @@ main = tls $ do
              v <- liftIO $ res # Welcome
              html v
 
+
+         post "/" $ do
+            email :: FilePath <- param "email"
+            pass :: FilePath <- param "pass"
+            liftIO $ print (email, pass)
+            return ()
+            
+
          -- TODO: think about if this is the right thing to do (file -> Text -> Lazy.ByteString)
          get "/css/:css" $ do
              fileName :: FilePath <- param "css"
