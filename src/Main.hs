@@ -1,9 +1,11 @@
-{-# LANGUAGE OverloadedStrings, TypeOperators, KindSignatures, GADTs, MultiParamTypeClasses, ScopedTypeVariables #-}
+{-# LANGUAGE OverloadedStrings, TypeOperators, KindSignatures, GADTs, MultiParamTypeClasses, ScopedTypeVariables, StandaloneDeriving #-}
 
+import           Control.Monad
 import           Control.Natural
 import           Control.Transformation
 import           Crypto.PasswordStore
 
+import           Data.List
 import           Data.Monoid    (mconcat)
 import qualified Data.Text as Text
 import           Data.Text (Text)
@@ -47,15 +49,20 @@ main = tls $ do
             setSimpleCookie "session-key" $ textOfSessionKey $ t
             redirect "/"
 
-         -- TODO: think about if this is the right thing to do (file -> Text -> Lazy.ByteString)
+
+         getRawContent "css" ".css" "text/css; charset=utf-8" res
+
+{-
+          -- TODO: think about if this is the right thing to do (file -> Text -> Lazy.ByteString)
          -- NOTE: choice - do not require session key here.
          get "/css/:css" $ do
              fileName :: FilePath <- param "css"
              -- TODO: check if on whitelist
              t <- liftIO $ res # CSS_File fileName
-             setHeader "Content-Type" "text/css; charset=utf-8"
+             setHeader "Content-Type" 
              raw $ encodeUtf8 t
-
+-}
+ 
          get "/js/:js" $ do
              fileName :: FilePath <- param "js"
              -- TODO: check if on whitelist
@@ -76,11 +83,15 @@ main = tls $ do
             return ()
    
    where
-         res = Resources $ Nat $ \ x -> case x of
+         res = Resources $ Nat $ \ x -> do 
+            print x
+            case x of
                  HomePage Nothing -> do
-                         LTIO.readFile "content/index.html"
+                         LTIO.readFile "content/include/index.html"
                  HomePage (Just key) -> do
-                         LTIO.readFile "content/index.html"
+                         LTIO.readFile "content/include/index.html"
+                 RawContent fileName -> do
+                         LBS.readFile $ "content/" ++ fileName
                  CSS_File fileName -> do
                          LTIO.readFile $ "content/css/" ++ fileName
                  JS_File fileName -> do
@@ -108,6 +119,7 @@ type Pass   = Text
 
 data ResourceM :: * -> * where
   HomePage      :: Maybe SessionKeyText -> ResourceM LT.Text
+  RawContent    :: FilePath             -> ResourceM LBS.ByteString
   CSS_File      :: FilePath             -> ResourceM LT.Text
   JS_File       :: FilePath             -> ResourceM LT.Text
   Font_File     :: FilePath             -> ResourceM LBS.ByteString
@@ -115,6 +127,9 @@ data ResourceM :: * -> * where
            -- ^ Generate a new session key with UserId's rights,
            --   if the Pass is valid,
            --   *or* fail for an undisclosed reason.
+deriving instance Show (ResourceM a) 
+
+        
 
 {-
 --class ServerLogger f where
@@ -153,3 +168,16 @@ checkSessionKey :: Text -> SessionKey -> Bool
 checkSessionKey keyText key = keyText == textOfSessionKey key
 
         
+getRawContent :: FilePath   -- first-level directory
+              -> String     -- suffix to use
+              -> LT.Text    -- style, for example "text/javascript; charset=utf-8"
+              -> Resources
+              -> ScottyM ()
+getRawContent dir suff style res = do
+    get (capture $ "/" ++ dir ++ "/:file") $ do
+         fileName :: FilePath <- param "file"
+         when (not (suff `isSuffixOf` fileName)) $ next
+         t <- liftIO $ res # RawContent $ dir ++ "/" ++ fileName
+         setHeader "Content-Type" $ style
+         raw $ t
+
