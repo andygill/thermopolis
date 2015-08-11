@@ -12,6 +12,7 @@ import           Data.Text (Text)
 import           Data.Text.Lazy.Encoding
 import qualified Data.Text.Lazy as LT
 import qualified Data.Text.Lazy.IO as LTIO
+import           Data.Text.Template
 
 import qualified Data.ByteString      as BS
 import qualified Data.ByteString.Lazy as LBS
@@ -68,8 +69,8 @@ main = tls $ do
          res = Resources $ Nat $ \ x -> do 
             print x
             case x of
-                 WelcomePage -> do
-                         LTIO.readFile "content/include/index.html"
+                 WelcomePage -> 
+                         welcomePage
                  HomePage key -> do
                          LTIO.readFile "content/include/index.html"
                  RawContent fileName -> do
@@ -158,3 +159,32 @@ getRawContent dir suff style res = do
          setHeader "Content-Type" $ style
          raw $ t
 
+------------------------
+
+class Monad f => ContentReader f where 
+ readFileC :: FilePath -> f LT.Text
+
+instance ContentReader IO where
+ readFileC fileName = LTIO.readFile $ "content/" ++ fileName
+
+--- 
+
+welcomePage :: ContentReader f => f LT.Text
+welcomePage = do
+ login <- loginPage
+ indexPage "Not Logged In" login "{{NOTHING}}"
+
+loginPage :: ContentReader f => f LT.Text
+loginPage = do
+        f <- readFileC "include/login.html"
+        return $ f
+
+indexPage :: ContentReader f => LT.Text -> LT.Text -> LT.Text -> f LT.Text
+indexPage who menu content = do
+        f <- readFileC "include/index.html"
+        substituteA (LT.toStrict f) context
+  where
+          context "who"     = return $ LT.toStrict $ who
+          context "menu"    = return $ LT.toStrict $  menu
+          context "content" = return $ LT.toStrict $  content
+          context  _        = fail "indexPage"
