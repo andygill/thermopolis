@@ -33,8 +33,8 @@ main :: IO ()
 main = tls $ do
          -- Anyone call view the login page
          get "/" $ do
-             v <- liftIO $ res # Welcome
              key <- getCookie "session-key"
+             v <- liftIO $ res # HomePage key
              liftIO $ print key
              html v
 
@@ -48,6 +48,7 @@ main = tls $ do
             redirect "/"
 
          -- TODO: think about if this is the right thing to do (file -> Text -> Lazy.ByteString)
+         -- NOTE: choice - do not require session key here.
          get "/css/:css" $ do
              fileName :: FilePath <- param "css"
              -- TODO: check if on whitelist
@@ -62,8 +63,10 @@ main = tls $ do
    
    where
          res = Resources $ Nat $ \ x -> case x of
-                 Welcome -> do
+                 HomePage Nothing -> do
                          LTIO.readFile "content/index.html"
+                 HomePage (Just key) -> do
+                         LTIO.readFile "content/home.html"
                  CSS_File fileName -> do
                          LTIO.readFile $ "content/css/" ++ fileName
                  NewSessionKey userid pass -> do
@@ -86,9 +89,9 @@ type UserId = Text      -- a *ku* email address
 type Pass   = Text
 
 data ResourceM :: * -> * where
-  Welcome       ::             ResourceM LT.Text
-  CSS_File      :: FilePath -> ResourceM LT.Text
-  NewSessionKey :: UserId   -> Pass -> ResourceM (Maybe SessionKey)
+  HomePage      :: Maybe SessionKeyText -> ResourceM LT.Text
+  CSS_File      :: FilePath             -> ResourceM LT.Text
+  NewSessionKey :: UserId -> Pass ->       ResourceM (Maybe SessionKey)
            -- ^ Generate a new session key with UserId's rights,
            --   if the Pass is valid,
            --   *or* fail for an undisclosed reason.
@@ -111,11 +114,12 @@ evalResourceM (Welcome) = do
 
 
 -----
+type SessionKeyText = Text
 
 newtype SessionKey = SessionKey BS.ByteString
         deriving (Eq, Ord, Show)
 
-textOfSessionKey :: SessionKey -> Text.Text
+textOfSessionKey :: SessionKey -> Text
 textOfSessionKey (SessionKey bs) = 
         Text.pack $ concatMap hex $ BS.unpack $ bs
  where hex = reverse . take 2 . reverse . ('0' :) . flip Numeric.showHex ""
@@ -125,6 +129,7 @@ newSessionKey = do
         es <- getEntropy 32
         return $ SessionKey es
         
---checkSessionKey :: Text -> SessionKey -> Bool
+checkSessionKey :: Text -> SessionKey -> Bool
+checkSessionKey keyText key = keyText == textOfSessionKey key
 
         
