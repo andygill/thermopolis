@@ -56,6 +56,20 @@ main = tls $ do
              setHeader "Content-Type" "text/css; charset=utf-8"
              raw $ encodeUtf8 t
 
+         get "/js/:js" $ do
+             fileName :: FilePath <- param "js"
+             -- TODO: check if on whitelist
+             t <- liftIO $ res # JS_File fileName
+             setHeader "Content-Type" "text/javascript; charset=utf-8"
+             raw $ encodeUtf8 t
+
+         get "/fonts/:fonts" $ do
+             fileName :: FilePath <- param "fonts"
+             -- TODO: check if on whitelist
+             t <- liftIO $ res # Font_File fileName
+             setHeader "Content-Type" "application/octet-stream"
+             raw $ t
+
          notFound $ do
             t <- request
             liftIO $ print t
@@ -66,9 +80,13 @@ main = tls $ do
                  HomePage Nothing -> do
                          LTIO.readFile "content/index.html"
                  HomePage (Just key) -> do
-                         LTIO.readFile "content/home.html"
+                         LTIO.readFile "content/index.html"
                  CSS_File fileName -> do
                          LTIO.readFile $ "content/css/" ++ fileName
+                 JS_File fileName -> do
+                         LTIO.readFile $ "content/js/" ++ fileName
+                 Font_File fileName -> do
+                         LBS.readFile $ "content/fonts/" ++ fileName
                  NewSessionKey userid pass -> do
                          sessionkey <- newSessionKey
                          return $ Just $ sessionkey
@@ -91,6 +109,8 @@ type Pass   = Text
 data ResourceM :: * -> * where
   HomePage      :: Maybe SessionKeyText -> ResourceM LT.Text
   CSS_File      :: FilePath             -> ResourceM LT.Text
+  JS_File       :: FilePath             -> ResourceM LT.Text
+  Font_File     :: FilePath             -> ResourceM LBS.ByteString
   NewSessionKey :: UserId -> Pass ->       ResourceM (Maybe SessionKey)
            -- ^ Generate a new session key with UserId's rights,
            --   if the Pass is valid,
