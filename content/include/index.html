@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<meta charset="utf-8">
+		<title>Bootstrap 3 Admin</title>
+		<meta name="generator" content="Bootply" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<link href="/css/bootstrap.min.css" rel="stylesheet">
+		<link href="/css/styles.css" rel="stylesheet">
+	</head>
+	<body>
+<!-- header -->
+<div id="top-nav" class="navbar navbar-inverse navbar-static-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">{{who}}</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          {{menu}}
+        </div>
+    </div>
+    <!-- /container -->
+</div>
+<!-- /Header -->
+
+<!-- Main -->
+<div class="container-fluid">
+ {{content}}
+</div>
+<!-- /Main -->
+
+	<!-- script references -->
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+		<script src="js/scripts.js"></script>
+	</body>
+</html>
