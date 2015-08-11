@@ -35,10 +35,16 @@ main :: IO ()
 main = tls $ do
          -- Anyone call view the login page
          get "/" $ do
-             key <- getCookie "session-key"
-             v <- liftIO $ res # HomePage key
-             liftIO $ print key
-             html v
+             optKey <- getCookie "session-key"
+             liftIO $ print optKey
+             case optKey of
+               Just key -> do
+                 v <- liftIO $ res # HomePage key
+                 -- TODO: what is we reject the key?
+                 html v
+               Nothing -> do
+                 v <- liftIO $ res # WelcomePage
+                 html v
 
          -- POSTing to / is the way a text password gets turned into a valid session key
          post "/" $ do
@@ -49,33 +55,9 @@ main = tls $ do
             setSimpleCookie "session-key" $ textOfSessionKey $ t
             redirect "/"
 
-
-         getRawContent "css" ".css" "text/css; charset=utf-8" res
-
-{-
-          -- TODO: think about if this is the right thing to do (file -> Text -> Lazy.ByteString)
-         -- NOTE: choice - do not require session key here.
-         get "/css/:css" $ do
-             fileName :: FilePath <- param "css"
-             -- TODO: check if on whitelist
-             t <- liftIO $ res # CSS_File fileName
-             setHeader "Content-Type" 
-             raw $ encodeUtf8 t
--}
- 
-         get "/js/:js" $ do
-             fileName :: FilePath <- param "js"
-             -- TODO: check if on whitelist
-             t <- liftIO $ res # JS_File fileName
-             setHeader "Content-Type" "text/javascript; charset=utf-8"
-             raw $ encodeUtf8 t
-
-         get "/fonts/:fonts" $ do
-             fileName :: FilePath <- param "fonts"
-             -- TODO: check if on whitelist
-             t <- liftIO $ res # Font_File fileName
-             setHeader "Content-Type" "application/octet-stream"
-             raw $ t
+         getRawContent "css" ".css" "text/css; charset=utf-8"        res
+         getRawContent "js"  ".js"  "text/javascript; charset=utf-8" res
+         getRawContent "fonts"  ""  "application/octet-stream"       res
 
          notFound $ do
             t <- request
@@ -86,47 +68,42 @@ main = tls $ do
          res = Resources $ Nat $ \ x -> do 
             print x
             case x of
-                 HomePage Nothing -> do
+                 WelcomePage -> do
                          LTIO.readFile "content/include/index.html"
-                 HomePage (Just key) -> do
+                 HomePage key -> do
                          LTIO.readFile "content/include/index.html"
                  RawContent fileName -> do
                          LBS.readFile $ "content/" ++ fileName
-                 CSS_File fileName -> do
-                         LTIO.readFile $ "content/css/" ++ fileName
-                 JS_File fileName -> do
-                         LTIO.readFile $ "content/js/" ++ fileName
-                 Font_File fileName -> do
-                         LBS.readFile $ "content/fonts/" ++ fileName
                  NewSessionKey userid pass -> do
                          sessionkey <- newSessionKey
                          return $ Just $ sessionkey
-                         
+
+
+
 data Resources = Resources (ResourceM :~> IO)
 
 instance Transformation ResourceM IO Resources where
   Resources t # f = t # f
 
-{-
-
-         get "/:word" $ do
-             beam <- param "word"
-             html $ mconcat ["<h1>Scotty, ", beam, " me up!</h1>"]
--}
-
 type UserId = Text      -- a *ku* email address
 type Pass   = Text
 
 data ResourceM :: * -> * where
-  HomePage      :: Maybe SessionKeyText -> ResourceM LT.Text
+  WelcomePage :: ResourceM LT.Text
+           -- ^ Generate the welcome page, including the password box
+  HomePage :: SessionKeyText -> ResourceM LT.Text
+           -- ^ Generate the homepage
+  ClassPage :: SessionKeyText -> String -> ResourceM LT.Text
+           -- ^ Generate a class-specific page
+  ProjectPage :: SessionKeyText -> String -> String -> ResourceM LT.Text
+           -- ^ Generate a project-specific page
   RawContent    :: FilePath             -> ResourceM LBS.ByteString
-  CSS_File      :: FilePath             -> ResourceM LT.Text
-  JS_File       :: FilePath             -> ResourceM LT.Text
-  Font_File     :: FilePath             -> ResourceM LBS.ByteString
-  NewSessionKey :: UserId -> Pass ->       ResourceM (Maybe SessionKey)
+           -- ^ Return some raw content, typically from flat files
+  NewSessionKey :: UserId -> Pass       -> ResourceM (Maybe SessionKey)
            -- ^ Generate a new session key with UserId's rights,
            --   if the Pass is valid,
            --   *or* fail for an undisclosed reason.
+
 deriving instance Show (ResourceM a) 
 
         
