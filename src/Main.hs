@@ -7,6 +7,7 @@ import           Crypto.PasswordStore
 
 import           Data.List
 import           Data.Monoid    (mconcat)
+import           Data.String
 import qualified Data.Text as Text
 import           Data.Text (Text)
 import           Data.Text.Lazy.Encoding
@@ -28,6 +29,7 @@ import           Web.Scotty.TLS
 
 import           System.Entropy
 
+
 tls :: ScottyM () -> IO ()
 -- tls = scottyTLS 3000 "server.key" "server.crt"
 tls = scotty 3000
@@ -44,7 +46,7 @@ main = tls $ do
                  -- TODO: what is we reject the key?
                  html v
                Nothing -> do
-                 v <- liftIO $ res # WelcomePage
+                 Page v <- liftIO $ res # WelcomePage
                  html v
 
          -- POSTing to / is the way a text password gets turned into a valid session key
@@ -90,7 +92,7 @@ type UserId = Text      -- a *ku* email address
 type Pass   = Text
 
 data ResourceM :: * -> * where
-  WelcomePage :: ResourceM LT.Text
+  WelcomePage :: ResourceM Page
            -- ^ Generate the welcome page, including the password box
   HomePage :: SessionKeyText -> ResourceM LT.Text
            -- ^ Generate the homepage
@@ -165,14 +167,31 @@ class Monad f => ContentReader f where
  readFileC :: FilePath -> f LT.Text
 
 instance ContentReader IO where
- readFileC fileName = LTIO.readFile $ "content/" ++ fileName
+ readFileC fileName = do
+         print fileName
+         LTIO.readFile $ "content/" ++ fileName
+
+newtype Page = Page LT.Text
+
+instance IsString Page where
+  fromString = Page . fromString
 
 --- 
 
-welcomePage :: ContentReader f => f LT.Text
+welcomePage :: ContentReader f => f Page
 welcomePage = do
- login <- loginPage
- indexPage "Not Logged In" login "{{NOTHING}}"
+ login <- readPage "include/login.html" []
+ readPage "include/index.html" 
+        [("who","Not Logged In")
+        ,("menu",login)
+        ,("content","{{NOTHING}}")
+        ]
+
+homePage :: ContentReader f => f LT.Text
+homePage = do
+ return ""
+-- menu <- menuPage
+-- indexPage "Not Logged In" login "{{NOTHING}}"
 
 loginPage :: ContentReader f => f LT.Text
 loginPage = do
@@ -185,6 +204,15 @@ indexPage who menu content = do
         substituteA (LT.toStrict f) context
   where
           context "who"     = return $ LT.toStrict $ who
-          context "menu"    = return $ LT.toStrict $  menu
-          context "content" = return $ LT.toStrict $  content
+          context "menu"    = return $ LT.toStrict $ menu
+          context "content" = return $ LT.toStrict $ content
           context  _        = fail "indexPage"
+
+readPage :: ContentReader f => FilePath -> [(Text,Page)] -> f Page
+readPage filePath env = do
+        f <- readFileC filePath
+        Page <$> substituteA (LT.toStrict f) context
+  where 
+        context nm = case lookup nm env of
+            Just (Page f) -> return $ LT.toStrict $ f
+            Nothing       -> fail $ "readPage " ++ show filePath ++ " for " ++ show nm
