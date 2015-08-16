@@ -32,13 +32,16 @@ import           Web.Scotty.TLS
 import           System.Entropy
 import           Network.CGI
 
+import           Paths_thermopolis
+
 class Monad f => ContentReader f where 
  readFileC :: FilePath -> f LT.Text
 
 instance ContentReader IO where
  readFileC fileName = do
 --         print fileName
-         LTIO.readFile $ "include/" ++ fileName
+        dir <- getDataDir
+        LTIO.readFile $ dir ++ "/include/" ++ fileName
 
 newtype Page = Page LT.Text
 

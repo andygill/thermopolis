@@ -15,6 +15,12 @@ build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
 
+Data-Files:
+    include/index.html	
+    include/login.html
+    include/menu.html
+
+
 executable thermopolis-welcome
   main-is:             Welcome.hs
   -- other-modules:       
