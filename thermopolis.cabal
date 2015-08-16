@@ -15,7 +15,7 @@ build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
 
-executable thermopolis
+executable thermopolis-welcome
   main-is:             Welcome.hs
   -- other-modules:       
   -- other-extensions:    

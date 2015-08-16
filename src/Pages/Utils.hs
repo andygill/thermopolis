@@ -30,6 +30,7 @@ import           Web.Scotty.Cookie
 import           Web.Scotty.TLS
 
 import           System.Entropy
+import           Network.CGI
 
 class Monad f => ContentReader f where 
  readFileC :: FilePath -> f LT.Text
@@ -54,3 +55,6 @@ readPage filePath env = do
         context nm = case lookup nm env of
             Just (Page f) -> return $ LT.toStrict $ f
             Nothing       -> fail $ "readPage " ++ show filePath ++ " for " ++ show nm
+
+outputPage :: MonadCGI m => Page -> m CGIResult
+outputPage (Page v) = outputFPS $ encodeUtf8 $ v

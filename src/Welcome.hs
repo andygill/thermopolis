@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Main where
 
 import           Data.Text.Lazy.Encoding
@@ -7,10 +8,12 @@ import Network.CGI
 
 import Pages.Utils
 import Pages.Welcome
+
 cgiMain :: CGI CGIResult
 cgiMain = do
-        Page v <- liftIO $ welcomePage
-        outputFPS $ encodeUtf8 $ v
+        p <- liftIO $ welcomePage
+--        fail "Bad Page"
+        outputPage p
 
 main :: IO ()
 main = runCGI $ handleErrors $ cgiMain
