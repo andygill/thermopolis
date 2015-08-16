@@ -42,7 +42,7 @@ main = tls $ do
              liftIO $ print optKey
              case optKey of
                Just key -> do
-                 v <- liftIO $ res # HomePage key
+                 Page v <- liftIO $ res # HomePage key
                  -- TODO: what is we reject the key?
                  html v
                Nothing -> do
@@ -51,10 +51,10 @@ main = tls $ do
 
          -- POSTing to / is the way a text password gets turned into a valid session key
          post "/" $ do
-            email :: Text <- param "email"
+            user :: Text <- param "user"
             pass :: Text <- param "pass"
-            liftIO $ print (email, pass)
-            Just t <- liftIO $ res # NewSessionKey email pass
+            liftIO $ print (user, pass)
+            Just t <- liftIO $ res # NewSessionKey user pass
             setSimpleCookie "session-key" $ textOfSessionKey $ t
             redirect "/"
 
@@ -74,7 +74,7 @@ main = tls $ do
                  WelcomePage -> 
                          welcomePage
                  HomePage key -> do
-                         LTIO.readFile "content/include/index.html"
+                         homePage key
                  RawContent fileName -> do
                          LBS.readFile $ "content/" ++ fileName
                  NewSessionKey userid pass -> do
@@ -94,7 +94,7 @@ type Pass   = Text
 data ResourceM :: * -> * where
   WelcomePage :: ResourceM Page
            -- ^ Generate the welcome page, including the password box
-  HomePage :: SessionKeyText -> ResourceM LT.Text
+  HomePage :: SessionKeyText -> ResourceM Page
            -- ^ Generate the homepage
   ClassPage :: SessionKeyText -> String -> ResourceM LT.Text
            -- ^ Generate a class-specific page
@@ -187,26 +187,15 @@ welcomePage = do
         ,("content","{{NOTHING}}")
         ]
 
-homePage :: ContentReader f => f LT.Text
-homePage = do
- return ""
--- menu <- menuPage
--- indexPage "Not Logged In" login "{{NOTHING}}"
+homePage :: ContentReader f => SessionKeyText -> f Page
+homePage _ = do
+ menu <- readPage "include/menu.html" []
+ readPage "include/index.html" 
+        [("who","Logged In")
+        ,("menu",menu)
+        ,("content","{{NOTHING}}")
+        ]
 
-loginPage :: ContentReader f => f LT.Text
-loginPage = do
-        f <- readFileC "include/login.html"
-        return $ f
-
-indexPage :: ContentReader f => LT.Text -> LT.Text -> LT.Text -> f LT.Text
-indexPage who menu content = do
-        f <- readFileC "include/index.html"
-        substituteA (LT.toStrict f) context
-  where
-          context "who"     = return $ LT.toStrict $ who
-          context "menu"    = return $ LT.toStrict $ menu
-          context "content" = return $ LT.toStrict $ content
-          context  _        = fail "indexPage"
 
 readPage :: ContentReader f => FilePath -> [(Text,Page)] -> f Page
 readPage filePath env = do
@@ -216,3 +205,8 @@ readPage filePath env = do
         context nm = case lookup nm env of
             Just (Page f) -> return $ LT.toStrict $ f
             Nothing       -> fail $ "readPage " ++ show filePath ++ " for " ++ show nm
+
+-----------
+
+-- :: SessionKeyText -> User
+
