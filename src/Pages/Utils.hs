@@ -36,7 +36,8 @@ readPage filePath env = do
   where 
         context nm = case lookup nm env of
             Just (Page f) -> return $ LT.toStrict $ f
-            Nothing       -> fail $ "readPage " ++ show filePath ++ " for " ++ show nm
+            Nothing       -> fail $ "readPage " ++ show filePath ++ ", can not find var " ++ show nm
 
 outputPage :: MonadCGI m => Page -> m CGIResult
 outputPage (Page v) = outputFPS $ encodeUtf8 $ v
+

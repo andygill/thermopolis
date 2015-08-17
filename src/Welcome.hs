@@ -9,7 +9,6 @@ import Pages.Welcome
 cgiMain :: CGI CGIResult
 cgiMain = do
         p <- liftIO $ welcomePage
---        fail "Bad Page"
         outputPage p
 
 main :: IO ()
