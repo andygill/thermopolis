@@ -3,6 +3,7 @@
 module Pages.Utils where
 
 import           Data.String
+import qualified Data.Text as Text
 import           Data.Text (Text)
 import           Data.Text.Lazy.Encoding
 import qualified Data.Text.Lazy as LT

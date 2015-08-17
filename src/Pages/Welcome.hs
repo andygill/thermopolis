@@ -12,7 +12,7 @@ welcomePage :: ContentReader f => f Page
 welcomePage = do
  login <- readPage "login.html" []
  readPage "index.html" 
-        [("who","Not Logged In")
+        [("who","Logged In")
         ,("menu",login)
         ,("content","{{NOTHING}}")
         ,("webRoot",fromString (webRoot config))

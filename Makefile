@@ -12,6 +12,8 @@ PUBLISH_DIR=/Users/andy/Sites/thermopolis
 push::
 	cp -r content/* $(PUBLISH_DIR)
 	cp -r content/.htaccess $(PUBLISH_DIR)
+	cp -r content/.htpasswd $(PUBLISH_DIR)
 
 	cp ./dist/build/thermopolis-welcome/thermopolis-welcome $(PUBLISH_DIR)/thermopolis-welcome.cgi
-#	cp ./dist/build/thermopolis/thermopolis-home    $(PUBLISH_DIR)/	
+	mkdir -p $(PUBLISH_DIR)/home
+	cp ./dist/build/thermopolis-home/thermopolis-home $(PUBLISH_DIR)/home/thermopolis-home.cgi
