@@ -19,6 +19,7 @@ Data-Files:
     include/index.html	
     include/login.html
     include/menu.html
+    include/home.html
 
 
 executable thermopolis-welcome

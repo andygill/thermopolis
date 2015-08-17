@@ -5,13 +5,13 @@ RewriteBase   /~andy/thermopolis/
 
 RewriteRule ^$ thermopolis-welcome.cgi [L,NC]
 
-RewriteRule ^home/?$ home/thermopolis-home.cgi [L,NC]
+#RewriteRule ^home/?$ home/thermopolis-home.cgi [L,NC]
 
 #
 # For testing
 #
-AuthType Basic
-AuthName "Sandbox"
-AuthUserFile "/Users/andy/Sites/thermopolis/.htpasswd"
-Require valid-user
+#AuthType Basic
+#AuthName "Sandbox"
+#AuthUserFile "/Users/andy/Sites/thermopolis/.htpasswd"
+#Require valid-user
 
