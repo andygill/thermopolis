@@ -2,34 +2,13 @@
 
 module Pages.Utils where
 
-import           Control.Monad
-import           Control.Natural
-import           Control.Transformation
-import           Crypto.PasswordStore
-
-import           Data.List
-import           Data.Monoid    (mconcat)
 import           Data.String
-import qualified Data.Text as Text
 import           Data.Text (Text)
 import           Data.Text.Lazy.Encoding
 import qualified Data.Text.Lazy as LT
 import qualified Data.Text.Lazy.IO as LTIO
 import           Data.Text.Template
 
-import qualified Data.ByteString      as BS
-import qualified Data.ByteString.Lazy as LBS
-
-import           Control.Monad.IO.Class
-
-import qualified Numeric 
-import           Network.HTTP.Types.Status
-
-import           Web.Scotty
-import           Web.Scotty.Cookie
-import           Web.Scotty.TLS
-
-import           System.Entropy
 import           Network.CGI
 
 import           Paths_thermopolis
