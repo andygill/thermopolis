@@ -2,5 +2,9 @@ Options +ExecCGI
 AddHandler cgi-script .cgi
 RewriteEngine On
 RewriteBase   /~andy/thermopolis/
+
 RewriteRule ^$ thermopolis-welcome.cgi [L,NC]
+
+RewriteRule ^home/?$ thermopolis-welcome.cgi [L,NC]
+
 
