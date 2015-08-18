@@ -42,7 +42,7 @@ readPage filePath env = do
         baseEnv <- baseEnvC
         Page <$> substituteA (LT.toStrict f) (context baseEnv)
   where 
-        context baseEnv nm = case lookup nm (env ++ ((\ (a,b) -> (a,pure b)) <$> baseEnv)) of
+        context baseEnv nm = case lookup nm (env ++ ((\ (a,b) -> (a,return b)) <$> baseEnv)) of
             Just g -> (\ (Page f) -> LT.toStrict f) <$> g
             Nothing       -> fail $ "readPage " ++ show filePath ++ ", can not find var " ++ show nm
 
