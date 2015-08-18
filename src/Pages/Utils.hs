@@ -17,7 +17,7 @@ import           Network.CGI
 
 import           Paths_thermopolis
 
-class Monad f => ContentReader f where 
+class (Applicative f, Monad f) => ContentReader f where 
  readFileC :: FilePath -> f LT.Text     -- ^ tell me how to load a static file
  baseEnvC  :: f [(Text,Page)]           -- ^ tell me what the base context is
                                         --   (the webRoot, for example)
