@@ -9,6 +9,11 @@
 
 PUBLISH_DIR=/Users/andy/Sites/thermopolis
 
+boot::
+	cabal build
+	make hack
+	make push
+
 push::
 	mkdir -p $(PUBLISH_DIR)/home
 

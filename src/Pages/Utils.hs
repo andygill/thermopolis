@@ -17,13 +17,16 @@ import           Network.CGI
 import           Paths_thermopolis
 
 class Monad f => ContentReader f where 
- readFileC :: FilePath -> f LT.Text
-
+ readFileC :: FilePath -> f LT.Text     -- ^ tell me how to load a static file
+ baseEnvC  :: f [(Text,Page)]           -- ^ tell me what the base context is
+                                        --   (the webRoot, for example)
+ 
 instance ContentReader IO where
  readFileC fileName = do
 --         print fileName
         dir <- getDataDir
         LTIO.readFile $ dir ++ "/include/" ++ fileName
+ baseEnvC = return $ [("webRoot",fromString (webRoot config))]
 
 newtype Page = Page LT.Text
 
@@ -32,15 +35,15 @@ instance IsString Page where
 
 -- This uses a call-by-value semantics for the Pages, aka the 
 -- string interpretation is done before injecting into a page.
-readPage :: ContentReader f => FilePath -> [(Text,Page)] -> f Page
+readPage :: ContentReader f => FilePath -> [(Text,f Page)] -> f Page
 readPage filePath env = do
         f <- readFileC filePath
-        Page <$> substituteA (LT.toStrict f) context
+        baseEnv <- baseEnvC
+        Page <$> substituteA (LT.toStrict f) (context baseEnv)
   where 
-        context nm = case lookup nm (env  ++ baseEnv) of
-            Just (Page f) -> return $ LT.toStrict $ f
+        context baseEnv nm = case lookup nm (env ++ ((\ (a,b) -> (a,pure b)) <$> baseEnv)) of
+            Just g -> (\ (Page f) -> LT.toStrict f) <$> g
             Nothing       -> fail $ "readPage " ++ show filePath ++ ", can not find var " ++ show nm
-        baseEnv = [("webRoot",fromString (webRoot config))]
 
 outputPage :: MonadCGI m => Page -> m CGIResult
 outputPage (Page v) = outputFPS $ encodeUtf8 $ v

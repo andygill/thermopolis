@@ -16,10 +16,9 @@ data HomePage = HomePage
 
 homePage :: ContentReader f => HomePage -> f Page
 homePage home = do
- let env = [("webRoot",fromString (webRoot config))]
- menu <- readPage "menu.html" env
- readPage "index.html" $ env ++
-        [("who",Page ("Logged In as " <> fromString (show (user home))))
-        ,("menu",menu)
-        ,("content","{{NOTHING}}")
+ menu <- readPage "menu.html" []
+ readPage "index.html"
+        [("who",return $ Page ("Logged In as " <> fromString (show (user home))))
+        ,("menu",readPage "menu.html" [])
+        ,("content",return $ "{{NOTHING}}")
         ]

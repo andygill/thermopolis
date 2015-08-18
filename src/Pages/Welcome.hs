@@ -10,11 +10,8 @@ import           Pages.Utils
 
 welcomePage :: ContentReader f => f Page
 welcomePage = do
- let env = [("webRoot",fromString (webRoot config))]
- login <- readPage "login.html" []
- content <- readPage "home.html" env
- readPage "index.html" $ env ++
-        [("who","Thermopolis")
-        ,("menu",login)
-        ,("content",content)
+ readPage "index.html" $ 
+        [("who",return "Thermopolis")
+        ,("menu",readPage "login.html" [])
+        ,("content",readPage "welcome.html" [])
         ]
