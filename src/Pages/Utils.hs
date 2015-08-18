@@ -2,6 +2,8 @@
 
 module Pages.Utils where
 
+import           Config
+
 import           Data.String
 import qualified Data.Text as Text
 import           Data.Text (Text)
@@ -35,9 +37,10 @@ readPage filePath env = do
         f <- readFileC filePath
         Page <$> substituteA (LT.toStrict f) context
   where 
-        context nm = case lookup nm env of
+        context nm = case lookup nm (env  ++ baseEnv) of
             Just (Page f) -> return $ LT.toStrict $ f
             Nothing       -> fail $ "readPage " ++ show filePath ++ ", can not find var " ++ show nm
+        baseEnv = [("webRoot",fromString (webRoot config))]
 
 outputPage :: MonadCGI m => Page -> m CGIResult
 outputPage (Page v) = outputFPS $ encodeUtf8 $ v
