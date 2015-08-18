@@ -3,6 +3,7 @@
 module Pages.Utils where
 
 import           Config
+import		 Control.Applicative
 
 import           Data.String
 import qualified Data.Text as Text
