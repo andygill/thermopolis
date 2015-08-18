@@ -24,3 +24,7 @@ push::
 
 hack::
 	cp include/*.html .cabal-sandbox/share/x86_64-osx-ghc-7.10.2/thermopolis-0.1.0.0/include/
+
+
+test::
+	curl -u andy:andy -D - 'http://localhost/~andy/thermopolis/home'
