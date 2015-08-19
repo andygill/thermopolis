@@ -1,6 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Config where
 
+import Data.String
+import Pages.Utils (BaseEnv(..))
+
 -- The config is compile-time static information.
 
 data Config = Config 
@@ -15,3 +18,6 @@ config = Config
   , superUser = "andy"
   , classes   = ["EECS368","EECS581","EECS776"]
   }
+
+instance BaseEnv Config where
+  getBaseEnv c = [("webRoot",fromString (webRoot c))]

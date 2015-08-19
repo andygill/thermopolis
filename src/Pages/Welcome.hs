@@ -1,12 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Pages.Welcome where
 
-import           Config
-
-import           Data.String
-
 import           Pages.Utils
-
 
 welcomePage :: ContentReader f => f Page
 welcomePage = do
