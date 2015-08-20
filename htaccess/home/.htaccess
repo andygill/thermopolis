@@ -1,0 +1,16 @@
+Options +ExecCGI
+AddHandler cgi-script .cgi
+RewriteEngine On
+RewriteBase   /~andy/thermopolis/
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*)$ home/thermopolis-home.cgi?=$1 [L,NC,QSD]
+
+#
+# For testing
+#
+AuthType Basic
+AuthName "Sandbox"
+AuthUserFile "/Users/andy/Sites/thermopolis/.htpasswd"
+Require valid-user
+
