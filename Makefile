@@ -17,15 +17,16 @@ boot::
 push::
 	mkdir -p $(PUBLISH_DIR)/home
 
-	cp -r content/* $(PUBLISH_DIR)
-	cp -r content/.htaccess $(PUBLISH_DIR)
+	cp -r content/* 		$(PUBLISH_DIR)
 
-	cp -r content/.htpasswd $(PUBLISH_DIR)
+	cp  htaccess/.htaccess 		$(PUBLISH_DIR)
+	cp  htaccess/home/.htaccess 	$(PUBLISH_DIR)/home
+
+	cp  .htpasswd 			$(PUBLISH_DIR)
 
 	cp ./dist/build/thermopolis-welcome/thermopolis-welcome $(PUBLISH_DIR)/thermopolis-welcome.cgi
 
-	cp -r content/home/.htaccess $(PUBLISH_DIR)/home
-	cp ./dist/build/thermopolis-home/thermopolis-home $(PUBLISH_DIR)/home/thermopolis-home.cgi
+	cp ./dist/build/thermopolis-home/thermopolis-home 	$(PUBLISH_DIR)/home/thermopolis-home.cgi
 
 hack::
 	cp -r include/*.html .cabal-sandbox/share/x86_64-osx-ghc-7.10.2/thermopolis-0.1.0.0/include/

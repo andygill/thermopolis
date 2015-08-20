@@ -12,12 +12,15 @@ maintainer:          andygill@ku.edu
 -- copyright:           
 -- category:            
 build-type:          Simple
-extra-source-files:  README.md
 cabal-version:       >=1.10
 
 Data-Files:
     include/*.html	
 
+extra-source-files:  
+    README.md
+    htaccess/.htaccess
+    htaccess/home/.htaccess
 
 executable thermopolis-welcome
   main-is:             Welcome.hs

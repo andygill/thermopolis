@@ -22,12 +22,14 @@ import           Paths_thermopolis
 
 class (Applicative f, Monad f) => ContentReader f where 
  readFileC :: FilePath -> f LT.Text     -- ^ tell me how to load a static file
+ webRootC  :: f Text
  baseEnvC  :: f [(Text,Page)]           -- ^ tell me what the base context is
                                         --   (the webRoot, for example)
 
  meC :: f Text                          -- ^ Path of *this* page
 
 class BaseEnv e where
+   getWebRoot :: e -> Text
    getBaseEnv :: e -> [(Text,Text)]
    getMe      :: e -> Text
 
@@ -36,6 +38,9 @@ instance BaseEnv e => ContentReader (PageM e) where
 --         print fileName
         dir <- liftIO $ getDataDir
         liftIO $ LTIO.readFile $ dir ++ "/include/" ++ fileName
+ webRootC = PageM $ do
+         e <- ask
+         return (getWebRoot e)
  baseEnvC = PageM $ do
          e <- ask
          return [ (i,Page $ LT.fromStrict v) | (i,v) <- getBaseEnv e ]
@@ -72,7 +77,8 @@ instance Monoid Page where
 readPage :: ContentReader f => FilePath -> [(Text,f Page)] -> f Page
 readPage filePath env = do
         f <- readFileC filePath
-        baseEnv <- baseEnvC
+        theWebRoot <- webRootC
+        let baseEnv = [("webRoot",textToPage theWebRoot)]
         Page <$> substituteA (LT.toStrict f) (context baseEnv)
   where 
         context baseEnv nm = case lookup nm (env ++ ((\ (a,b) -> (a,return b)) <$> baseEnv)) of

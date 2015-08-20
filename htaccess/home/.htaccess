@@ -4,7 +4,7 @@ RewriteEngine On
 RewriteBase   /~andy/thermopolis/
 
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.*)$ home/thermopolis-home.cgi?=$1 [L,NC,QSD]
+RewriteRule ^(.*)$ home/thermopolis-home.cgi?path=$1 [L,NC,QSD]
 
 #
 # For testing

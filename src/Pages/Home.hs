@@ -27,7 +27,7 @@ homePage home = do
         ,("menu",readPage "menu.html" [])
         ,("content",readPage "content.html" 
             [("sidebar",sidebarPage (sidebar home))
-            ,("content",return "{{{CONTENT}}}")
+            ,("content",textToPage <$> meC)
             ])
         ]
 

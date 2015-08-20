@@ -22,7 +22,7 @@ sidebarPage (Classes clss) = readPage "sidebar.html" [
                    ] ++ concat
                    [ sideLink ("home/" <> textToId cls) 
                               (glyphicon "education" <+> nbsp <+> return (textToPage cls))  :
-                     [ sideLink "#"
+                     [ sideLink ("home/" <> textToId cls <> "/HW" <> fromString (show j))
                                 (nbsp  <+> nbsp  <+> nbsp  <+> nbsp <+> glyphicon "warning-sign"  
                                                  <+> nbsp <+> return (fromString ("Homework " ++ show j)))
                      | j <- [1..i]
@@ -52,16 +52,9 @@ glyphicon name = readPage "glyphicon.html" [("glyphicon",return (fromString $ "g
 sideLink :: ContentReader f => Text -> f Page -> f Page
 sideLink path content = readPage "sidelink.html" 
                    [ ("class",active path)
-                   , ("url",return (textToPage path))
+                   , ("path",return (textToPage path))
                    , ("content",content)
                    ]
-
--- TODO: add webRoot
-
-link :: Text -> f Page
-link path = undefined
-        
-
 
 active :: ContentReader f => Text -> f Page
 active path = do

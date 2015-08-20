@@ -15,3 +15,4 @@ data PageInfo = PageInfo
 instance BaseEnv PageInfo where
   getBaseEnv c = [("webRoot", C.webRoot $ config c)]
   getMe = me
+  getWebRoot c = C.webRoot $ config c
