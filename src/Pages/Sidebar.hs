@@ -10,7 +10,7 @@ import qualified Data.Text as T
 import qualified Data.Text.Lazy as LT
 
 data Sidebar
-  = Classes [(String,Int)]
+  = Classes [(Text,Int)]
   
 sidebarPage :: ContentReader f => Sidebar -> f Page
 sidebarPage (Classes clss) = readPage "sidebar.html" [
@@ -20,9 +20,11 @@ sidebarPage (Classes clss) = readPage "sidebar.html" [
                              <+> nbsp 
                              <+> return "Home")
                    ] ++ concat
-                   [ sideLink "#" (glyphicon "education" <+> nbsp <+> return (fromString cls))  :
-                     [ sideLink "#" (nbsp  <+> nbsp  <+> nbsp  <+> nbsp <+> glyphicon "warning-sign"  
-                                                     <+> nbsp <+> return (fromString ("Homework " ++ show j)))
+                   [ sideLink ("home/" <> textToId cls) 
+                              (glyphicon "education" <+> nbsp <+> return (textToPage cls))  :
+                     [ sideLink "#"
+                                (nbsp  <+> nbsp  <+> nbsp  <+> nbsp <+> glyphicon "warning-sign"  
+                                                 <+> nbsp <+> return (fromString ("Homework " ++ show j)))
                      | j <- [1..i]
                      ]
                    | (cls,i) <- clss
@@ -50,9 +52,15 @@ glyphicon name = readPage "glyphicon.html" [("glyphicon",return (fromString $ "g
 sideLink :: ContentReader f => Text -> f Page -> f Page
 sideLink path content = readPage "sidelink.html" 
                    [ ("class",active path)
-                   , ("url",return (fromString (T.unpack path)))
+                   , ("url",return (textToPage path))
                    , ("content",content)
                    ]
+
+-- TODO: add webRoot
+
+link :: Text -> f Page
+link path = undefined
+        
 
 
 active :: ContentReader f => Text -> f Page

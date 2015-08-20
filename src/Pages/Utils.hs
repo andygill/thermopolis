@@ -83,5 +83,8 @@ outputPage :: MonadCGI m => Page -> m CGIResult
 outputPage (Page v) = outputFPS $ encodeUtf8 $ v
 
 -- Create an identifier (remove the spaces)
-textToId :: Text -> Page
-textToId = Page . LT.fromStrict . Text.filter (not . isSpace)
+textToId :: Text -> Text
+textToId = Text.filter (not . isSpace)
+
+textToPage :: Text -> Page
+textToPage = Page . LT.fromStrict 
