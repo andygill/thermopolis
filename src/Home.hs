@@ -23,13 +23,14 @@ cgiMain = do
         mAuth <- authType
         mUser <- remoteUser
         path <- getInput "path"
-        main2 mAuth mUser (case path of Nothing -> ""
-                                        Just p -> normalize p)
+        main2 mAuth mUser (normalize path)
   where
-        normalize = reverse . f . reverse
+        normalize Nothing  = ""
+        normalize (Just p) = reverse $ f $ reverse $ p
           where f ('/':cs) = f cs
                 f cs       = cs
 
+main2 :: Maybe String -> Maybe String -> String -> CGI CGIResult
 main2 Nothing _ _ = outputInternalServerError ["no auth found"]
 main2 _ Nothing _ = outputInternalServerError ["no user found inside auth zone"]
 main2 (Just auth) (Just user) path | map toLower auth == "basic" = do
