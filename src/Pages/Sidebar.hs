@@ -15,12 +15,13 @@ data Sidebar
 sidebarPage :: ContentReader f => Sidebar -> f Page
 sidebarPage (Classes clss) = readPage "sidebar.html" [
            ("content",mconcat <$> sequenceA
-                  ([ sideLink (glyphicon "home"
+                  ([ sideLink "home" 
+                            (glyphicon "home"
                              <+> nbsp 
                              <+> return "Home")
                    ] ++ concat
-                   [ sideLink  (glyphicon "education" <+> nbsp <+> return (fromString cls))  :
-                     [ sideLink (nbsp  <+> nbsp  <+> nbsp  <+> nbsp <+> glyphicon "warning-sign"  
+                   [ sideLink "#" (glyphicon "education" <+> nbsp <+> return (fromString cls))  :
+                     [ sideLink "#" (nbsp  <+> nbsp  <+> nbsp  <+> nbsp <+> glyphicon "warning-sign"  
                                                      <+> nbsp <+> return (fromString ("Homework " ++ show j)))
                      | j <- [1..i]
                      ]
@@ -46,13 +47,20 @@ glyphicon name = readPage "glyphicon.html" [("glyphicon",return (fromString $ "g
 
 
 -- TODO: add active
-sideLink :: ContentReader f => f Page -> f Page
-sideLink content = readPage "sidelink.html" 
-                   [ ("class",return "")        -- active if *this* page
-                   , ("url",return "#")
+sideLink :: ContentReader f => Text -> f Page -> f Page
+sideLink path content = readPage "sidelink.html" 
+                   [ ("class",active path)
+                   , ("url",return (fromString (T.unpack path)))
                    , ("content",content)
                    ]
 
+
+active :: ContentReader f => Text -> f Page
+active path = do
+        me <- meC
+        if path == me 
+        then return "active"
+        else return ""        
 
 {-                   
 nestBar :: ContentReader f => String -> Page -> f Page -> f Page

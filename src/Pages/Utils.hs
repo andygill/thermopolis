@@ -24,8 +24,12 @@ class (Applicative f, Monad f) => ContentReader f where
  readFileC :: FilePath -> f LT.Text     -- ^ tell me how to load a static file
  baseEnvC  :: f [(Text,Page)]           -- ^ tell me what the base context is
                                         --   (the webRoot, for example)
+
+ meC :: f Text                          -- ^ Path of *this* page
+
 class BaseEnv e where
    getBaseEnv :: e -> [(Text,Text)]
+   getMe      :: e -> Text
 
 instance BaseEnv e => ContentReader (PageM e) where
  readFileC fileName = PageM $ do
@@ -35,6 +39,10 @@ instance BaseEnv e => ContentReader (PageM e) where
  baseEnvC = PageM $ do
          e <- ask
          return [ (i,Page $ LT.fromStrict v) | (i,v) <- getBaseEnv e ]
+ meC = PageM $ do
+         e <- ask
+         return (getMe e)
+
  
 -- return $ [("webRoot",fromString (webRoot config))]
 

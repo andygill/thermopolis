@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
-import Config
+import qualified PageInfo  
+import qualified Config
 
 import Data.Char
 
@@ -25,7 +26,7 @@ main2 Nothing _ = outputInternalServerError ["no auth found"]
 main2 _ Nothing = outputInternalServerError ["no user found inside auth zone"]
 main2 (Just auth) (Just user) | map toLower auth == "basic" = do
     p <- liftIO $ runPageM (homePage (HomePage (User user) (Classes [("EECS 776",3),("EECS 581",4)])))
-                           config
+                           (PageInfo.PageInfo Config.config "home")
     outputPage p
 main2 _ _ = outputInternalServerError ["auth provided not understood"]
 

@@ -28,7 +28,7 @@ push::
 	cp ./dist/build/thermopolis-home/thermopolis-home $(PUBLISH_DIR)/home/thermopolis-home.cgi
 
 hack::
-	cp include/*.html .cabal-sandbox/share/x86_64-osx-ghc-7.10.2/thermopolis-0.1.0.0/include/
+	cp -r include/*.html .cabal-sandbox/share/x86_64-osx-ghc-7.10.2/thermopolis-0.1.0.0/include/
 
 
 test::
