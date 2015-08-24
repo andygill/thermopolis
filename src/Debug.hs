@@ -1,15 +1,9 @@
-module Debug where
-
-import           Data.String
-import qualified Data.Text as Text
-import           Data.Text (Text)
-import           Data.Text.Lazy.Encoding
-import qualified Data.Text.Lazy as LT
-import qualified Data.Text.Lazy.IO as LTIO
-import           Data.Text.Template
+module Main where
 
 import           Network.CGI
 
+main :: IO ()
+main = runCGI $ handleErrors $ cgiDebug
 
 cgiDebug :: MonadCGI m => m CGIResult
 cgiDebug = do

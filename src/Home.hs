@@ -13,7 +13,6 @@ import Network.CGI
 import Pages.Utils
 import Pages.Home
 import Pages.Sidebar(Sidebar(..))
-import Debug
 
 import Types
 
@@ -40,6 +39,4 @@ main2 (Just auth) (Just user) path | map toLower auth == "basic" = do
 main2 _ _ _ = outputInternalServerError ["auth provided not understood"]
 
 main :: IO ()
-main = runCGI $ handleErrors $ 
---                cgiDebug
-                cgiMain
+main = runCGI $ handleErrors $ cgiMain
