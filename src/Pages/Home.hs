@@ -2,6 +2,7 @@
 module Pages.Home where
 
 import           Config
+import           Control.Applicative
 
 import           Data.Monoid
 import           Data.String
