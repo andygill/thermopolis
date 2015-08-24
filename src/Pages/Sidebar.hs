@@ -5,6 +5,7 @@ import           Control.Applicative
 import           Data.Char        
 import           Data.Monoid
 import           Data.String
+import           Data.Traversable
 import           Pages.Utils
 import           Data.Text(Text)
 import qualified Data.Text as T
