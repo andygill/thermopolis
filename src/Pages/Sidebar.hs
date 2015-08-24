@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Pages.Sidebar where
 
+import           Control.Applicative
 import           Data.Char        
 import           Data.Monoid
 import           Data.String
