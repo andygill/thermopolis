@@ -1,6 +1,9 @@
 module Types where
         
-newtype User = User String
+import Data.Text (Text)
 
-instance Show User where
-  show (User nm) = nm
+data User = User
+        { userName :: Text
+        , userClasses :: [Text]
+        } deriving Show
+

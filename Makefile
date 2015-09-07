@@ -34,3 +34,6 @@ hack::
 
 test::
 	curl -u andy:andy -D - 'http://localhost/~andy/thermopolis/home'
+
+
+publish::

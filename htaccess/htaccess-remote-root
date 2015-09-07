@@ -1,0 +1,5 @@
+# On remote site, in root dir (/var/www/thermopolis/https)
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^$ cgi-bin/test.cgi [L,NC]
+

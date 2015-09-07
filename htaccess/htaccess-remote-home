@@ -1,0 +1,6 @@
+# On remote site, in root dir (/var/www/thermopolis/https/https_authenticated)
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*)$ https_authenticated/cgi-bin/thermopolis-debug.cgi?path=$1 [L,NC,QSD]
+
+
