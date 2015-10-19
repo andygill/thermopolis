@@ -8,5 +8,5 @@ data User = User
         } deriving Show
 
 
--- 'Path' is a 'Text' of the absolute path for a specific webpage
-type Path = Text
+-- 'Path' is a list of 'Text' of the absolute path for a specific webpage, from our root.
+type Path = [Text]

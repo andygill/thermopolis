@@ -9,10 +9,12 @@ import Network.CGI
 import Pages.Utils
 import Pages.Welcome
 import View
+import Debug(cgiDebug)
 
 cgiMain :: CGI CGIResult
 cgiMain = do
-        p <- liftIO $ welcomePage (View { viewPath = "", viewRoot = Config.webRoot Config.config, viewee = () })
+        p <- liftIO $ welcomePage (View { viewPath = []
+                                        , viewee = () })
         outputClause p
 
 main :: IO ()
