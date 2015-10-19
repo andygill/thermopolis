@@ -21,7 +21,7 @@ import           Paths_thermopolis
 
 
 class (Applicative f, Monad f) => ContentReader f where 
- readFileC :: FilePath -> f LT.Text     -- ^ tell me how to load a static file
+ readFileC :: FilePath -> f Clause     -- ^ tell me how to load a static file
  webRootC  :: f Text
  baseEnvC  :: f [(Text,Page)]           -- ^ tell me what the base context is
                                         --   (the webRoot, for example)
@@ -48,7 +48,12 @@ instance BaseEnv e => ContentReader (PageM e) where
          e <- ask
          return (getMe e)
 
- 
+instance ContentReader IO where
+  readFileC fileName = do
+        dir <- getDataDir
+        LTIO.readFile $ dir ++ "/include/" ++ fileName
+  
+
 -- return $ [("webRoot",fromString (webRoot config))]
 
 newtype PageM e a = PageM (ReaderT e IO a)
@@ -60,7 +65,14 @@ deriving instance Functor     (PageM e)
 deriving instance Applicative (PageM e)
 deriving instance Monad       (PageM e)
 
+-- TODO: Consider making this a synonym. We use Lazy Text,
+-- because we use Page as Page Fragments.
 newtype Page = Page LT.Text
+
+-- A Clause is a fragment of HTML, and is user/viewer facing.
+-- A Clause should not be compared against; instead compare
+-- the data being used to generate the Clause.
+type Clause = LT.Text
 
 instance Show Page where
   show (Page i) = LT.unpack i
@@ -94,3 +106,20 @@ textToId = Text.filter (not . isSpace)
 
 textToPage :: Text -> Page
 textToPage = Page . LT.fromStrict 
+
+readClause :: ContentReader f => FilePath -> [(Text,f Clause)] -> f Clause
+readClause filePath env = do
+        f <- readFileC filePath
+        let baseEnv = []
+        substituteA (LT.toStrict f) context 
+  where 
+        context nm = case lookup nm env of
+                      Nothing -> error $ "readClause failure for " ++ show nm ++ " in " ++ show filePath
+                      Just g -> LT.toStrict <$> g
+
+textToClause :: Text -> Clause
+textToClause = LT.fromStrict 
+
+-- We output with UTF-8.
+outputClause :: MonadCGI m => Clause -> m CGIResult
+outputClause = outputFPS . encodeUtf8 
