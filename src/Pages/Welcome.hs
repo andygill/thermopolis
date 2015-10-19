@@ -10,5 +10,5 @@ welcomePage v = do
         [("who",    return "Thermopolis")
         ,("menu",   readClause "login.html" [])
         ,("content",readClause "welcome.html" [])
-        ,("webRoot",return $ textToClause $ viewRoot v)
+        ,("webRoot",return $ viewRootClause v)
         ]
