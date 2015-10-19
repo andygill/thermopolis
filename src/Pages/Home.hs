@@ -11,7 +11,7 @@ import           Pages.Sidebar (Sidebar, sidebarPage)
 import           Pages.Utils
 
 import           Types
-
+import           View
 
 -- Content
 data HomePage = HomePage
@@ -20,15 +20,16 @@ data HomePage = HomePage
   }
 
 -- Form
-homePage :: ContentReader f => HomePage -> f Page
+homePage :: ContentReader f => View HomePage -> f Clause
 homePage home = do
- menu <- readPage "menu.html" []
- readPage "index.html"
-        [("who",return $ Page ("Logged In as " <> fromString (show (user home))))
-        ,("menu",readPage "menu.html" [])
-        ,("content",readPage "content.html" 
-            [("sidebar",sidebarPage (sidebar home))
-            ,("content",textToPage <$> meC)
+ menu <- readClause "menu.html" []
+ readClause "index.html"
+        [("webRoot",return $ viewRootClause home)
+        ,("who",return $ ("Logged In as " <> fromString (show (user (viewee home)))))
+        ,("menu",readClause "menu.html" [])
+        ,("content",readClause "content.html" 
+            [("sidebar",return "") -- sidebarPage (sidebar home))
+            ,("content",return "ha!") -- textToPage <$> meC)
             ])
         ]
 

@@ -10,6 +10,7 @@ import           Pages.Utils
 import           Data.Text(Text)
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as LT
+import           View
 
 data Sidebar
   = Classes [(Text,Int)]
@@ -50,7 +51,6 @@ glyphicon name = readPage "glyphicon.html" [("glyphicon",return (fromString $ "g
 -- "triangle-bottom"    
 
 
--- TODO: add active
 sideLink :: ContentReader f => Text -> f Page -> f Page
 sideLink path content = readPage "sidelink.html" 
                    [ ("class",active path)
@@ -64,6 +64,10 @@ active path = do
         if path == me 
         then return "active"
         else return ""        
+
+--active' :: View Text -> Page
+--active' v | viewee v == viewPath v = "active"
+--          | otherwise              = ""
 
 {-                   
 nestBar :: ContentReader f => String -> Page -> f Page -> f Page

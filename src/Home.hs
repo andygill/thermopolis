@@ -16,7 +16,8 @@ import Pages.Sidebar(Sidebar(..))
 
 import Remote
 import Types
-
+import Debug(cgiDebug)
+import View
 
 main :: IO ()
 main = runCGI $ handleErrors $ checkAuthentication
@@ -57,9 +58,9 @@ generateAuthenticatedPage user = do
 
 generateHomePage :: User -> CGI CGIResult
 generateHomePage user = do
-    p <- liftIO $ runPageM (homePage (HomePage user (Classes [("EECS 776",3),("EECS 581",4)])))
-                           (PageInfo.PageInfo Config.config ("home/" <> T.pack path))
-    outputPage p        
+    p <- liftIO $ homePage (mkView ["home",""] (HomePage user (Classes [("EECS 776",3),("EECS 581",4)])))
+--                           (PageInfo.PageInfo Config.config ("home/" <> T.pack path))
+    outputClause p        
   where path = ""
 
 generateClassPage :: User -> CGI CGIResult
@@ -68,7 +69,7 @@ generateClassPage = generateHomePage
 generateHomeworkPage :: User -> CGI CGIResult
 generateHomeworkPage = generateHomePage
 
-
+{-
 cgiMain :: CGI CGIResult
 cgiMain = do
         -- If this page is served, there better be a remoteUser
@@ -90,4 +91,4 @@ main2 (Just auth) (Just user) path | map toLower auth == "basic" = do
                            (PageInfo.PageInfo Config.config ("home/" <> T.pack path))
     outputPage p
 main2 _ _ _ = outputInternalServerError ["auth provided not understood"]
-
+-}
