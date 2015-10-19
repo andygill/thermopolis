@@ -1,9 +1,6 @@
-module Main where
+module Debug where
 
 import           Network.CGI
-
-main :: IO ()
-main = runCGI $ handleErrors $ cgiDebug
 
 cgiDebug :: MonadCGI m => m CGIResult
 cgiDebug = do
