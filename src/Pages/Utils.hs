@@ -22,8 +22,6 @@ import           Types
 import           Data.List(intersperse)
 import qualified Data.Text as T
 
-
-
 class (Applicative f, Monad f) => ContentReader f where 
  readFileC :: FilePath -> f Clause     -- ^ tell me how to load a static file
  webRootC  :: f Text
@@ -144,3 +142,6 @@ infixl 4 <+>
 (<+>) :: Applicative f => f Clause -> f Clause -> f Clause
 (<+>) f g = mappend <$> f <*> g
 
+rootClause :: PageIdentity p f => f Clause
+rootClause = (textToClause . T.concat . map (const "../") . enumFromTo 1) <$> pageDepth
+ 

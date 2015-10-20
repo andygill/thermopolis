@@ -2,13 +2,13 @@
 module Pages.Welcome where
 
 import           Pages.Utils
-import           View
+import           Types
 
-welcomePage :: ContentReader f => View () -> f Clause
-welcomePage v = do
+welcomePage :: (PageIdentity _p f, ContentReader f) => f Clause
+welcomePage = do
  readClause "index.html" $
         [("who",    return "Thermopolis")
         ,("menu",   readClause "login.html" [])
         ,("content",readClause "welcome.html" [])
-        ,("webRoot",return $ viewRootClause v)
+        ,("webRoot",rootClause)
         ]

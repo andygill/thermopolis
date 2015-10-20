@@ -13,7 +13,7 @@ import Debug(cgiDebug)
 
 cgiMain :: CGI CGIResult
 cgiMain = do
-        p <- liftIO $ welcomePage $ mkView [] ()
+        p <- liftIO $ welcomePage
         outputClause p
 
 main :: IO ()

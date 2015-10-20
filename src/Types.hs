@@ -1,6 +1,8 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, FlexibleInstances, MultiParamTypeClasses, FunctionalDependencies #-}
 module Types where
         
+import Control.Monad.Trans.Reader
+
 import Data.Char 
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -53,3 +55,19 @@ smartPathDepth :: SmartPath -> Int
 smartPathDepth (Home)            = 0
 smartPathDepth (AClass _)        = 1
 smartPathDepth (AAssignment _ _) = 2
+
+----------------------------------------------------
+
+class Monad f => PageIdentity p f | f -> p where
+   self      :: p -> f Bool
+   pageDepth :: f Int
+   
+instance PageIdentity () IO where
+   self () = return True
+   pageDepth = return 0
+   
+   
+instance Monad f => PageIdentity SmartPath (ReaderT SmartPath f) where
+   self p = (== p) <$> ask
+   pageDepth = smartPathDepth <$> ask
+        
