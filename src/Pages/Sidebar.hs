@@ -11,18 +11,21 @@ import           Data.Text(Text)
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as LT
 import           View
+import           Types
 
 data Sidebar
-  = Classes [(Text,Int)]
-  
-sidebarPage :: ContentReader f => Sidebar -> f Page
-sidebarPage (Classes clss) = readPage "sidebar.html" [
-           ("content",mconcat <$> sequenceA
-                  ([ sideLink "home" 
+  = Classes [(Text,Int)]        -- classname and number of homeworks
+
+sidebarClause :: ContentReader f => View Sidebar -> f Clause
+sidebarClause sidebar = readClause "sidebar.html" 
+    [      ("content",mconcat <$> sequenceA
+                  ([ sideLink (["home"] <$ sidebar)
                             (glyphicon "home"
                              <+> nbsp 
-                             <+> return "Home")
-                   ] ++ concat
+                             <+> pure "Home")
+                   ] 
+{-
+                                      ++ concat
                    [ sideLink ("home/" <> textToId cls) 
                               (glyphicon "education" <+> nbsp <+> return (textToPage cls))  :
                      [ sideLink ("home/" <> textToId cls <> "/HW" <> fromString (show j))
@@ -31,32 +34,27 @@ sidebarPage (Classes clss) = readPage "sidebar.html" [
                      | j <- [1..i]
                      ]
                    | (cls,i) <- clss
-                   ])
+                   ]-})
            )
-   ]
+   ] where Classes clss = viewee sidebar
 
 
-nbsp :: Applicative f => f Page
-nbsp = pure "&nbsp;"
-
-infixl 4 <+>
-
-(<+>) :: Applicative f => f Page -> f Page -> f Page
-(<+>) f g = mappend <$> f <*> g
+glyphicon :: ContentReader f => Text -> f Clause
+glyphicon name = readClause "glyphicon.html" [("glyphicon",return $ "glyphicon glyphicon-" <> textToClause name)]
 
 
-glyphicon :: ContentReader f => String -> f Page
-glyphicon name = readPage "glyphicon.html" [("glyphicon",return (fromString $ "glyphicon glyphicon-" ++ name))]
-
--- "triangle-bottom"    
-
-
-sideLink :: ContentReader f => Text -> f Page -> f Page
-sideLink path content = readPage "sidelink.html" 
-                   [ ("class",active path)
-                   , ("path",return (textToPage path))
+sideLink :: ContentReader f => View Path -> f Clause -> f Clause
+sideLink path content = readClause "sidelink.html" 
+                   [ ("class",return $ active path)
+                   , ("path",return $ viewRootClause path <> pathToClause (viewee path)) 
                    , ("content",content)
                    ]
+
+active :: View Path -> Clause
+active v | viewee v == viewPath v = "active"
+         | otherwise              = ""
+
+{-
 
 active :: ContentReader f => Text -> f Page
 active path = do
@@ -65,9 +63,7 @@ active path = do
         then return "active"
         else return ""        
 
---active' :: View Text -> Page
---active' v | viewee v == viewPath v = "active"
---          | otherwise              = ""
+
 
 {-                   
 nestBar :: ContentReader f => String -> Page -> f Page -> f Page
@@ -78,3 +74,4 @@ nestBar tag header content = readPage "nestbar.html"
            ]
 -}
 
+-}

@@ -18,6 +18,10 @@ import           Data.Text.Template
 import           Network.CGI
 
 import           Paths_thermopolis
+import           Types
+import           Data.List(intersperse)
+import qualified Data.Text as T
+
 
 
 class (Applicative f, Monad f) => ContentReader f where 
@@ -120,6 +124,19 @@ readClause filePath env = do
 textToClause :: Text -> Clause
 textToClause = LT.fromStrict 
 
+pathToClause :: Path -> Clause
+pathToClause = textToClause . T.concat . intersperse "/" 
+
 -- We output with UTF-8.
 outputClause :: MonadCGI m => Clause -> m CGIResult
 outputClause = outputFPS . encodeUtf8 
+
+
+nbsp :: Applicative f => f Clause
+nbsp = pure "&nbsp;"
+
+infixl 4 <+>
+
+(<+>) :: Applicative f => f Clause -> f Clause -> f Clause
+(<+>) f g = mappend <$> f <*> g
+

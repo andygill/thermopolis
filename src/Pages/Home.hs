@@ -7,7 +7,7 @@ import           Control.Applicative
 import           Data.Monoid
 import           Data.String
 
-import           Pages.Sidebar (Sidebar, sidebarPage)
+import           Pages.Sidebar (Sidebar, sidebarClause)
 import           Pages.Utils
 
 import           Types
@@ -28,7 +28,7 @@ homePage home = do
         ,("who",return $ ("Logged In as " <> fromString (show (user (viewee home)))))
         ,("menu",readClause "menu.html" [])
         ,("content",readClause "content.html" 
-            [("sidebar",return "") -- sidebarPage (sidebar home))
+            [("sidebar", sidebarClause (sidebar <$> home))
             ,("content",return "ha!") -- textToPage <$> meC)
             ])
         ]

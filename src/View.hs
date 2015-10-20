@@ -6,7 +6,7 @@ module View where
 import           Data.List(intersperse)
 import qualified Data.Text as T
 
-import Pages.Utils(Clause, textToClause)
+import Pages.Utils(Clause, textToClause,pathToClause)
 
 import Types(Path)
 
@@ -28,4 +28,4 @@ viewRootClause :: View a -> Clause
 viewRootClause = textToClause . T.concat . map (const "../") . drop 1 . viewPath
  
 viewPathClause ::  View a -> Clause
-viewPathClause = textToClause . T.concat . intersperse "/" . viewPath
+viewPathClause = pathToClause . viewPath
