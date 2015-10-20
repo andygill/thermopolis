@@ -57,8 +57,8 @@ smartPathDepth (AClass _)        = 1
 smartPathDepth (AAssignment _ _) = 2
 
 ----------------------------------------------------
-
-class Monad f => PageIdentity p f | f -> p where
+{-
+class PageIdentity p f | f -> p where
    self      :: p -> f Bool
    pageDepth :: f Int
    
@@ -70,4 +70,4 @@ instance PageIdentity () IO where
 instance Monad f => PageIdentity SmartPath (ReaderT SmartPath f) where
    self p = (== p) <$> ask
    pageDepth = smartPathDepth <$> ask
-        
+-}        

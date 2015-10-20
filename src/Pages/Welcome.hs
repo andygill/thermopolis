@@ -3,6 +3,7 @@ module Pages.Welcome where
 
 import           Pages.Utils
 import           Types
+import           Web.Thermopolis.PageIdentity
 
 welcomePage :: (PageIdentity _p f, ContentReader f) => f Clause
 welcomePage = do

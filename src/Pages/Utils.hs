@@ -4,6 +4,7 @@ module Pages.Utils where
 
 import		 Control.Applicative
 import           Control.Monad.Trans.Reader
+import           Control.Monad.Trans.Class
 
 import           Data.Char
 import           Data.Monoid
@@ -21,6 +22,8 @@ import           Paths_thermopolis
 import           Types
 import           Data.List(intersperse)
 import qualified Data.Text as T
+
+import           Web.Thermopolis.PageIdentity
 
 class (Applicative f, Monad f) => ContentReader f where 
  readFileC :: FilePath -> f Clause     -- ^ tell me how to load a static file
@@ -55,6 +58,8 @@ instance ContentReader IO where
         dir <- getDataDir
         LTIO.readFile $ dir ++ "/include/" ++ fileName
   
+instance (ContentReader f) => ContentReader (ReaderT s f) where
+  readFileC = lift . readFileC
 
 -- return $ [("webRoot",fromString (webRoot config))]
 
@@ -142,6 +147,6 @@ infixl 4 <+>
 (<+>) :: Applicative f => f Clause -> f Clause -> f Clause
 (<+>) f g = mappend <$> f <*> g
 
-rootClause :: PageIdentity p f => f Clause
-rootClause = (textToClause . T.concat . map (const "../") . enumFromTo 1) <$> pageDepth
+rootClause :: (Functor f, PageIdentity p f) => f Clause
+rootClause = textToClause <$> root
  
