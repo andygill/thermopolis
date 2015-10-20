@@ -133,6 +133,8 @@ pathToClause = textToClause . T.concat . map (<> "/")
 outputClause :: MonadCGI m => Clause -> m CGIResult
 outputClause = outputFPS . encodeUtf8 
 
+classClause :: Class -> Clause
+classClause = textToClause . T.pack . show
 
 nbsp :: Applicative f => f Clause
 nbsp = pure "&nbsp;"

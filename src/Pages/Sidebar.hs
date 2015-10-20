@@ -14,7 +14,7 @@ import           View
 import           Types
 
 data Sidebar
-  = Classes [(Text,Int)]        -- classname and number of homeworks
+  = Classes [(Class,Int)]        -- classname and number of homeworks
 
 sidebarClause :: ContentReader f => View Sidebar -> f Clause
 sidebarClause sidebar = readClause "sidebar.html" 
@@ -24,9 +24,9 @@ sidebarClause sidebar = readClause "sidebar.html"
                              <+> nbsp 
                              <+> pure "Home")
                    ]  ++ concat
-                   [ sideLink (["home",textToId cls] <$ sidebar)
-                              (glyphicon "education" <+> nbsp <+> return (textToClause cls))  :
-                     [ sideLink (["home",textToId cls,"HW" <> fromString (show j)] <$ sidebar)
+                   [ sideLink (["home",T.pack $ show cls] <$ sidebar)
+                              (glyphicon "education" <+> nbsp <+> return (textToClause $ T.pack $ show cls))  :
+                     [ sideLink (["home",T.pack $ show cls,"HW" <> fromString (show j)] <$ sidebar)
                                 (nbsp  <+> nbsp  <+> nbsp  <+> nbsp <+> glyphicon "warning-sign"  
                                                  <+> nbsp <+> return (fromString ("Homework " ++ show j)))
                      | j <- [1..i]

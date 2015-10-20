@@ -27,35 +27,42 @@ checkAuthentication = do
         mAuth <- authType        
         case mAuth of
            Nothing -> outputInternalServerError ["no auth found"]
-           Just auth | map toLower auth == "basic" -> checkUsername
+           Just auth | map toLower auth == "basic" -> checkDB
            _       -> outputInternalServerError ["auth provided not understood"]
-                   
-checkUsername :: CGI CGIResult
-checkUsername = do
+
+-- Next, check that we can open the database                   
+checkDB :: CGI CGIResult
+checkDB = do
+        db <- liftIO $ openDB
+        checkUsername db
+
+-- Next, check that we have a user, and look up their basic info.
+checkUsername :: RemoteDevice -> CGI CGIResult
+checkUsername db = do
         mUser <- remoteUser        
         case mUser of
            Nothing -> outputInternalServerError ["no user found inside auth zone"]
            Just user -> do
-                db <- liftIO $ openDB
                 userInfo <- liftIO $ send db $ GetUserInfo (T.pack user)
                 if T.null (userName userInfo)
                 then outputInternalServerError ["user is not in any classes"]
-                else checkPath userInfo
+                else checkPath db userInfo
 
-
-checkPath :: User -> CGI CGIResult
-checkPath user = do
+checkPath :: RemoteDevice -> User -> CGI CGIResult
+checkPath db user = do
         optPath <- getInput "path"
         let path = case optPath of
                  Nothing -> []
                  Just p -> map T.pack $ words $ map slash $ p
-        generateAuthenticatedPage user path
+        generateAuthenticatedPage db user path
   where slash '/' = ' '
         slash c   = c
 
-generateAuthenticatedPage :: User -> Path -> CGI CGIResult
-generateAuthenticatedPage user path = case path of
-  _ -> generate homePage (HomePage user (Classes [("EECS 776",3),("EECS 581",4)]))
+generateAuthenticatedPage :: RemoteDevice -> User -> Path -> CGI CGIResult
+generateAuthenticatedPage db user path = do
+   hws <- liftIO $ send db $ sequence $ map GetHomeworks $ userClasses $ user
+   case path of
+     _ -> generate homePage (HomePage user (Classes [(EECS776,3),(EECS581,4)]))
 --  _ -> outputInternalServerError ["bad path: " ++ show path]
   where
     generate f v = do
@@ -72,7 +79,7 @@ generateAuthenticatedPage user path = case path of
                  [class']    -> generateClassPage path user
                  [class',hw] -> generateHomeworkPage path user                         
                  _          -> outputInternalServerError ["misformed path"]
--}
+
 
 generateHomePage :: User -> CGI CGIResult
 generateHomePage user = do
@@ -86,7 +93,7 @@ generateClassPage = generateHomePage
 
 generateHomeworkPage :: User -> CGI CGIResult
 generateHomeworkPage = generateHomePage
-
+-}
 
 {-
 cgiMain :: CGI CGIResult
