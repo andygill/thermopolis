@@ -124,8 +124,10 @@ readClause filePath env = do
 textToClause :: Text -> Clause
 textToClause = LT.fromStrict 
 
+-- A 'Path' is a list of (virtual) directories. A non-empty 'Path'
+-- is always terminated with a "/".
 pathToClause :: Path -> Clause
-pathToClause = textToClause . T.concat . intersperse "/" 
+pathToClause = textToClause . T.concat . map (<> "/")
 
 -- We output with UTF-8.
 outputClause :: MonadCGI m => Clause -> m CGIResult

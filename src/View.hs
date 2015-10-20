@@ -25,7 +25,7 @@ mkView p a = View { viewPath = p, viewee = a }
 
 -- | get the path to the root, assuming our current path
 viewRootClause :: View a -> Clause
-viewRootClause = textToClause . T.concat . map (const "../") . drop 1 . viewPath
+viewRootClause = textToClause . T.concat . map (const "../") . viewPath
  
 viewPathClause ::  View a -> Clause
 viewPathClause = pathToClause . viewPath

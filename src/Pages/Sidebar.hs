@@ -23,18 +23,16 @@ sidebarClause sidebar = readClause "sidebar.html"
                             (glyphicon "home"
                              <+> nbsp 
                              <+> pure "Home")
-                   ] 
-{-
-                                      ++ concat
-                   [ sideLink ("home/" <> textToId cls) 
-                              (glyphicon "education" <+> nbsp <+> return (textToPage cls))  :
-                     [ sideLink ("home/" <> textToId cls <> "/HW" <> fromString (show j))
+                   ]  ++ concat
+                   [ sideLink (["home",textToId cls] <$ sidebar)
+                              (glyphicon "education" <+> nbsp <+> return (textToClause cls))  :
+                     [ sideLink (["home",textToId cls,"HW" <> fromString (show j)] <$ sidebar)
                                 (nbsp  <+> nbsp  <+> nbsp  <+> nbsp <+> glyphicon "warning-sign"  
                                                  <+> nbsp <+> return (fromString ("Homework " ++ show j)))
                      | j <- [1..i]
                      ]
                    | (cls,i) <- clss
-                   ]-})
+                   ])
            )
    ] where Classes clss = viewee sidebar
 
@@ -54,24 +52,3 @@ active :: View Path -> Clause
 active v | viewee v == viewPath v = "active"
          | otherwise              = ""
 
-{-
-
-active :: ContentReader f => Text -> f Page
-active path = do
-        me <- meC
-        if path == me 
-        then return "active"
-        else return ""        
-
-
-
-{-                   
-nestBar :: ContentReader f => String -> Page -> f Page -> f Page
-nestBar tag header content = readPage "nestbar.html" 
-           [ ("target",return $ textToId tag)
-           , ("header",return header)
-           , ("content",content)
-           ]
--}
-
--}

@@ -40,25 +40,43 @@ checkUsername = do
                 userInfo <- liftIO $ send db $ GetUserInfo (T.pack user)
                 if T.null (userName userInfo)
                 then outputInternalServerError ["user is not in any classes"]
-                else generateAuthenticatedPage userInfo
+                else checkPath userInfo
 
 
-generateAuthenticatedPage :: User -> CGI CGIResult
-generateAuthenticatedPage user = do
+checkPath :: User -> CGI CGIResult
+checkPath user = do
         optPath <- getInput "path"
-        case optPath of
-          Nothing -> generateHomePage user
-          Just path -> case words (map slash path) of
-                         []         -> generateHomePage user
-                         [class']    -> generateClassPage user
-                         [class',hw] -> generateHomeworkPage user                         
-                         _          -> outputInternalServerError ["misformed path"]
+        let path = case optPath of
+                 Nothing -> []
+                 Just p -> map T.pack $ words $ map slash $ p
+        generateAuthenticatedPage user path
   where slash '/' = ' '
         slash c   = c
 
+generateAuthenticatedPage :: User -> Path -> CGI CGIResult
+generateAuthenticatedPage user path = case path of
+  _ -> generate homePage (HomePage user (Classes [("EECS 776",3),("EECS 581",4)]))
+--  _ -> outputInternalServerError ["bad path: " ++ show path]
+  where
+    generate f v = do
+            -- This is where we encode that the authenticated service
+            -- all have the home prefix. The apache checks that everything,
+            -- from home down, is authenticated.
+            p <- liftIO $ f (mkView ("home":path) v)
+            outputClause p            
+{-
+
+
+         case path of
+                 []          -> generateHomePage path user
+                 [class']    -> generateClassPage path user
+                 [class',hw] -> generateHomeworkPage path user                         
+                 _          -> outputInternalServerError ["misformed path"]
+-}
+
 generateHomePage :: User -> CGI CGIResult
 generateHomePage user = do
-    p <- liftIO $ homePage (mkView ["home",""] (HomePage user (Classes [("EECS 776",3),("EECS 581",4)])))
+    p <- liftIO $ homePage (mkView ["home"] (HomePage user (Classes [("EECS 776",3),("EECS 581",4)])))
 --                           (PageInfo.PageInfo Config.config ("home/" <> T.pack path))
     outputClause p        
   where path = ""
@@ -68,6 +86,7 @@ generateClassPage = generateHomePage
 
 generateHomeworkPage :: User -> CGI CGIResult
 generateHomeworkPage = generateHomePage
+
 
 {-
 cgiMain :: CGI CGIResult
