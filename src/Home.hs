@@ -68,7 +68,7 @@ generateAuthenticatedPage db user path = do
             -- This is where we encode that the authenticated service
             -- all have the home prefix. The apache checks that everything,
             -- from home down, is authenticated.
-            p <- liftIO $ runReaderT (f (mkView ("home":[]) v)) path
+            p <- liftIO $ runReaderT (f v) path
             outputClause p            
 {-
 

@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings,GADTs #-}
 module Pages.Sidebar where
 
 import           Control.Applicative
@@ -19,17 +19,17 @@ import           Web.Thermopolis.PageIdentity
 data Sidebar
   = Classes [(Class,Int)]        -- classname and number of homeworks
 
-sidebarClause :: (PageIdentity p f, ContentReader f) => View Sidebar -> f Clause
+sidebarClause :: (PageIdentity p f, p ~ SmartPath,      ContentReader f) => Sidebar -> f Clause
 sidebarClause sidebar = readClause "sidebar.html" 
     [      ("content",mconcat <$> sequenceA
-                  ([ sideLink (Home <$ sidebar)
+                  ([ sideLink (Home)
                             (glyphicon "home"
                              <+> nbsp 
                              <+> pure "Home")
                    ]  ++ concat
-                   [ sideLink (AClass cls <$ sidebar)
+                   [ sideLink (AClass cls)
                               (glyphicon "education" <+> nbsp <+> return (textToClause $ T.pack $ show cls))  :
-                     [ sideLink (AAssignment cls (HW j) <$ sidebar)
+                     [ sideLink (AAssignment cls (HW j))
                                 (nbsp  <+> nbsp  <+> nbsp  <+> nbsp <+> glyphicon "warning-sign"  
                                                  <+> nbsp <+> return (fromString ("Homework " ++ show j)))
                      | j <- [1..i]
@@ -37,23 +37,23 @@ sidebarClause sidebar = readClause "sidebar.html"
                    | (cls,i) <- clss
                    ])
            )
-   ] where Classes clss = viewee sidebar
+   ] where Classes clss = sidebar
 
 
 glyphicon :: ContentReader f => Text -> f Clause
 glyphicon name = readClause "glyphicon.html" [("glyphicon",return $ "glyphicon glyphicon-" <> textToClause name)]
 
 
-sideLink :: (PageIdentity p f, ContentReader f) => View SmartPath -> f Clause -> f Clause
+sideLink :: (PageIdentity p f, ContentReader f) => p -> f Clause -> f Clause
 sideLink path content = readClause "sidelink.html" 
-                   [ ("class",return $ active path)
-                   , ("path",rootClause <+> return (textToClause (T.pack (show (viewee path)))))
+                   [ ("class",active path)
+                   , ("path",rootClause <+> return (textToClause (T.pack (show path))))
 --                   return $ viewRootClause path <> pathToClause (viewee path)) 
                    , ("content",content)
                    ]
 
-active :: View SmartPath -> Clause
-active v = "" 
+active :: (Eq p, Monad f, PageIdentity p f) => p -> f Clause
+active v = return "" 
 -- | viewee v == viewPath v = "active"
 --         | otherwise              = ""
 

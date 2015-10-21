@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, GADTs #-}
 module Pages.Home where
 
 import           Config
@@ -22,15 +22,15 @@ data HomePage = HomePage
   }
 
 -- Form
-homePage :: (PageIdentity p f, ContentReader f) => View HomePage -> f Clause
+homePage :: (PageIdentity p f, p ~ SmartPath, ContentReader f) => HomePage -> f Clause
 homePage home = do
  menu <- readClause "menu.html" []
  readClause "index.html"
         [("webRoot",rootClause)
-        ,("who",return $ ("Logged In as " <> fromString (show (user (viewee home)))))
+        ,("who",return $ ("Logged In as " <> fromString (show (user home))))
         ,("menu",readClause "menu.html" [])
         ,("content",readClause "content.html" 
-            [("sidebar", sidebarClause (sidebar <$> home))
+            [("sidebar", sidebarClause (sidebar home))
             ,("content",return "ha!") -- textToPage <$> meC)
             ])
         ]

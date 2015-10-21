@@ -10,6 +10,8 @@ import Pages.Utils(Clause, textToClause,pathToClause)
 
 import Types(Path)
 
+{-
+
 -- A 'View' is a wrapper around an objected to be viewed, 
 -- that contains presentation specific information, like
 -- web root address, and path to this page.
@@ -29,3 +31,5 @@ viewRootClause = textToClause . T.concat . map (const "../") . viewPath
  
 viewPathClause ::  View a -> Clause
 viewPathClause = pathToClause . viewPath
+
+-}
