@@ -16,9 +16,24 @@ import           Types
 import           Web.Thermopolis.PageIdentity
 
 
-data Sidebar
-  = Classes [(Class,Int)]        -- classname and number of homeworks
+data Sidebar p = Sidebar [SideItem p]
 
+data SideItem p = SideItem p (Sidebar p)
+
+mkSidebar :: User -> Sidebar SmartPath
+mkSidebar u = Sidebar
+ [ SideItem Home (Sidebar [])
+ ]
+
+sidebarClause :: (PageIdentity p f, p ~ SmartPath, ContentReader f) => Sidebar p -> f Clause
+sidebarClause (Sidebar items) = readClause "sidebar.html" [ ("content", mconcat <$> sequenceA (map sideItem items)) ]
+  where
+          sideItem (SideItem p (Sidebar ps)) =
+                  sideLink p (pure "...")
+
+--  = Classes [(Class,Int)]        -- classname and number of homeworks
+
+{-
 sidebarClause :: (PageIdentity p f, p ~ SmartPath,      ContentReader f) => Sidebar -> f Clause
 sidebarClause sidebar = readClause "sidebar.html" 
     [      ("content",mconcat <$> sequenceA
@@ -38,7 +53,7 @@ sidebarClause sidebar = readClause "sidebar.html"
                    ])
            )
    ] where Classes clss = sidebar
-
+-}
 
 glyphicon :: ContentReader f => Text -> f Clause
 glyphicon name = readClause "glyphicon.html" [("glyphicon",return $ "glyphicon glyphicon-" <> textToClause name)]
@@ -52,8 +67,7 @@ sideLink path content = readClause "sidelink.html"
                    , ("content",content)
                    ]
 
-active :: (Eq p, Monad f, PageIdentity p f) => p -> f Clause
-active v = return "" 
--- | viewee v == viewPath v = "active"
---         | otherwise              = ""
+active :: (Eq p, Functor f, PageIdentity p f) => p -> f Clause
+active p = (\ s -> if s == p then "active" else "") <$> self
+
 

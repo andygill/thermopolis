@@ -18,7 +18,7 @@ import           Web.Thermopolis.PageIdentity
 -- Content
 data HomePage = HomePage
   { user    :: User
-  , sidebar :: Sidebar
+  , sidebar :: Sidebar SmartPath
   }
 
 -- Form

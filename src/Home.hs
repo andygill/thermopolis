@@ -14,7 +14,7 @@ import Network.CGI
 
 import Pages.Utils
 import Pages.Home
-import Pages.Sidebar(Sidebar(..))
+import Pages.Sidebar(Sidebar(..),mkSidebar)
 
 import Remote
 import Types
@@ -61,7 +61,7 @@ generateAuthenticatedPage :: RemoteDevice -> User -> SmartPath -> CGI CGIResult
 generateAuthenticatedPage db user path = do
    hws <- liftIO $ send db $ sequence $ map GetHomeworks $ userClasses $ user
    case path of
-     _ -> generate homePage (HomePage user (Classes [(EECS776,3),(EECS581,4)]))
+     _ -> generate homePage (HomePage user (mkSidebar user))
 --  _ -> outputInternalServerError ["bad path: " ++ show path]
   where
     generate f v = do
