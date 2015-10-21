@@ -8,6 +8,8 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import Data.List
 
+import           Web.Thermopolis.PageIdentity
+
 data User = User
         { userName :: Text
         , userClasses :: [Class]
@@ -25,14 +27,17 @@ readClass xs = case reads xs of
                 [(c,"")] -> return c
                 _ -> fail "readClass"
 
-
-data SmartPath = Home
-               | AClass Class
-               | AAssignment Class Assignment
-        deriving (Eq, Ord, Show, Read)
-
 data Assignment = HW Int
-        deriving (Eq, Ord, Show, Read)
+        deriving (Eq, Ord)
+        
+instance Show Assignment where
+    show (HW n) = "HW" ++ show n
+
+instance Read Assignment where
+    readsPrec _ xs0 = [ (v,xs1)
+                      | (t,xs1) <- lex xs0
+                      , let (Just v) = readAssignment t
+                      ]
 
 readAssignment :: String -> Maybe Assignment
 readAssignment xs | length xs > 2 
@@ -40,6 +45,16 @@ readAssignment xs | length xs > 2
                  && "hw" `isPrefixOf` (map toLower xs)
                  = return $ HW $ read $ drop 2 $ xs
 readAssignment _ = fail "readAssignment"
+
+data SmartPath = Home
+               | AClass Class
+               | AAssignment Class Assignment
+        deriving (Eq, Ord, Read)
+
+instance Show SmartPath where
+  show Home                  = "home/"
+  show (AClass cls)          = "home/" ++ show cls
+  show (AAssignment cls ass) = "home/" ++ show cls ++ "/" ++ show ass
 
 readSmartPath :: String -> Maybe SmartPath
 readSmartPath p = case words (map slash p) of
@@ -52,9 +67,12 @@ readSmartPath p = case words (map slash p) of
         slash c   = c
 
 smartPathDepth :: SmartPath -> Int
-smartPathDepth (Home)            = 0
+smartPathDepth (Home)            = 1
 smartPathDepth (AClass _)        = 1
 smartPathDepth (AAssignment _ _) = 2
+
+instance Depth SmartPath where
+  depth = smartPathDepth
 
 ----------------------------------------------------
 {-

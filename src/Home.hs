@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
+import Control.Monad.Trans.Reader
+
 import qualified PageInfo  
 import qualified Config
 
@@ -51,14 +53,11 @@ checkUsername db = do
 checkPath :: RemoteDevice -> User -> CGI CGIResult
 checkPath db user = do
         optPath <- getInput "path"
-        let path = case optPath of
-                 Nothing -> []
-                 Just p -> map T.pack $ words $ map slash $ p
-        generateAuthenticatedPage db user path
-  where slash '/' = ' '
-        slash c   = c
+        case optPath >>= readSmartPath of
+                 Nothing -> outputInternalServerError ["no valid path found"]
+                 Just path -> generateAuthenticatedPage db user path
 
-generateAuthenticatedPage :: RemoteDevice -> User -> Path -> CGI CGIResult
+generateAuthenticatedPage :: RemoteDevice -> User -> SmartPath -> CGI CGIResult
 generateAuthenticatedPage db user path = do
    hws <- liftIO $ send db $ sequence $ map GetHomeworks $ userClasses $ user
    case path of
@@ -69,7 +68,7 @@ generateAuthenticatedPage db user path = do
             -- This is where we encode that the authenticated service
             -- all have the home prefix. The apache checks that everything,
             -- from home down, is authenticated.
-            p <- liftIO $ f (mkView ("home":path) v)
+            p <- liftIO $ runReaderT (f (mkView ("home":[]) v)) path
             outputClause p            
 {-
 

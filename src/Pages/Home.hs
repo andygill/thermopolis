@@ -13,6 +13,8 @@ import           Pages.Utils
 import           Types
 import           View
 
+import           Web.Thermopolis.PageIdentity
+
 -- Content
 data HomePage = HomePage
   { user    :: User
@@ -20,11 +22,11 @@ data HomePage = HomePage
   }
 
 -- Form
-homePage :: ContentReader f => View HomePage -> f Clause
+homePage :: (PageIdentity p f, ContentReader f) => View HomePage -> f Clause
 homePage home = do
  menu <- readClause "menu.html" []
  readClause "index.html"
-        [("webRoot",return $ viewRootClause home)
+        [("webRoot",rootClause)
         ,("who",return $ ("Logged In as " <> fromString (show (user (viewee home)))))
         ,("menu",readClause "menu.html" [])
         ,("content",readClause "content.html" 
