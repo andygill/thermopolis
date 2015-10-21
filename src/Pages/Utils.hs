@@ -28,11 +28,11 @@ import           Web.Thermopolis.PageIdentity
 class (Applicative f, Monad f) => ContentReader f where 
  readFileC :: FilePath -> f Clause     -- ^ tell me how to load a static file
  webRootC  :: f Text
- baseEnvC  :: f [(Text,Page)]           -- ^ tell me what the base context is
-                                        --   (the webRoot, for example)
+-- baseEnvC  :: f [(Text,Page)]           -- ^ tell me what the base context is
+--                                        --   (the webRoot, for example)
 
  meC :: f Text                          -- ^ Path of *this* page
-
+{-
 class BaseEnv e where
    getWebRoot :: e -> Text
    getBaseEnv :: e -> [(Text,Text)]
@@ -52,7 +52,7 @@ instance BaseEnv e => ContentReader (PageM e) where
  meC = PageM $ do
          e <- ask
          return (getMe e)
-
+-}
 instance ContentReader IO where
   readFileC fileName = do
         dir <- getDataDir
@@ -62,7 +62,7 @@ instance (ContentReader f) => ContentReader (ReaderT s f) where
   readFileC = lift . readFileC
 
 -- return $ [("webRoot",fromString (webRoot config))]
-
+{-
 newtype PageM e a = PageM (ReaderT e IO a)
 
 runPageM :: PageM e a -> e -> IO a
@@ -75,12 +75,14 @@ deriving instance Monad       (PageM e)
 -- TODO: Consider making this a synonym. We use Lazy Text,
 -- because we use Page as Page Fragments.
 newtype Page = Page LT.Text
+-}
 
 -- A Clause is a fragment of HTML, and is user/viewer facing.
 -- A Clause should not be compared against; instead compare
 -- the data being used to generate the Clause.
 type Clause = LT.Text
 
+{-
 instance Show Page where
   show (Page i) = LT.unpack i
         
@@ -106,14 +108,15 @@ readPage filePath env = do
 
 outputPage :: MonadCGI m => Page -> m CGIResult
 outputPage (Page v) = outputFPS $ encodeUtf8 $ v
+-}
 
 -- Create an identifier (remove the spaces)
 textToId :: Text -> Text
 textToId = Text.filter (not . isSpace)
-
+{-
 textToPage :: Text -> Page
 textToPage = Page . LT.fromStrict 
-
+-}
 readClause :: ContentReader f => FilePath -> [(Text,f Clause)] -> f Clause
 readClause filePath env = do
         f <- readFileC filePath

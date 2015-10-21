@@ -10,16 +10,21 @@ import Data.Char
 import Data.Monoid
 import qualified Data.Text as T
 
+import           Model.Page
+import           Model.Home
+
 import Network.CGI
 
 import Pages.Utils
-import Pages.Home
+--import Pages.Home
 import Pages.Sidebar(Sidebar(..),mkSidebar)
 
 import Remote
 import Types
 import Debug(cgiDebug)
 import View
+import           View.Home
+
 
 main :: IO ()
 main = runCGI $ handleErrors $ checkAuthentication
@@ -61,14 +66,14 @@ generateAuthenticatedPage :: RemoteDevice -> User -> SmartPath -> CGI CGIResult
 generateAuthenticatedPage db user path = do
    hws <- liftIO $ send db $ sequence $ map GetHomeworks $ userClasses $ user
    case path of
-     _ -> generate homePage (HomePage user (mkSidebar user))
+     _ -> generate $ homePage (mkPage user HomeContent)
 --  _ -> outputInternalServerError ["bad path: " ++ show path]
   where
-    generate f v = do
+    generate m = do
             -- This is where we encode that the authenticated service
             -- all have the home prefix. The apache checks that everything,
             -- from home down, is authenticated.
-            p <- liftIO $ runReaderT (f v) path
+            p <- liftIO $ runReaderT m path
             outputClause p            
 {-
 

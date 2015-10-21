@@ -2,7 +2,7 @@
 module Config where
 
 import Data.Text
-import Pages.Utils (BaseEnv(..))
+import Pages.Utils -- (BaseEnv(..))
 
 -- The config is compile-time static information.
 
