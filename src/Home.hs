@@ -3,7 +3,6 @@ module Main where
 
 import Control.Monad.Trans.Reader
 
-import qualified PageInfo  
 import qualified Config
 
 import Data.Char
@@ -16,13 +15,10 @@ import           Model.Home
 import Network.CGI
 
 import Pages.Utils
---import Pages.Home
-import Pages.Sidebar(Sidebar(..),mkSidebar)
 
 import Remote
 import Types
 import Debug(cgiDebug)
-import View
 import           View.Home
 
 

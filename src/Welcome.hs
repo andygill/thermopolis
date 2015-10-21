@@ -3,14 +3,12 @@ module Main where
 
 import Control.Monad.Trans.Reader
 
-import qualified PageInfo  
 import qualified Config
 
 import Network.CGI
 
 import Pages.Utils
 import Pages.Welcome
-import View
 import Debug(cgiDebug)
 
 cgiMain :: CGI CGIResult

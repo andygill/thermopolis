@@ -14,7 +14,6 @@ import           Model.Home
 import           Pages.Utils
 
 import           Types
-import           View
 
 import           Web.Thermopolis.PageIdentity
 import           Data.Tree
