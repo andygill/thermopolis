@@ -3,13 +3,11 @@ module Main where
 
 import Control.Monad.Trans.Reader
 
-import qualified Config
-
 import Network.CGI
 
 import Web.Thermopolis.Clause
-import Pages.Welcome
-import Debug(cgiDebug)
+import View.Welcome
+import Debug()
 
 cgiMain :: CGI CGIResult
 cgiMain = do

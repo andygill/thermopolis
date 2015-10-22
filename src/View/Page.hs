@@ -1,7 +1,6 @@
 {-# LANGUAGE OverloadedStrings, GADTs, FlexibleContexts, ScopedTypeVariables #-}
 module View.Page where
 
-import           Config
 import           Control.Applicative
 
 import           Data.Monoid
@@ -27,7 +26,11 @@ pageClause page = do
  readClause "index.html"
         [("webRoot",rootClause)
         ,("who",return $ ("Logged In as " <> textToClause (pageUser page)))
-        ,("menu",readClause "menu.html" [])
+        ,("menu", readClause "right-button.html" 
+                        [ ("label",pure "Sign Out")
+                        , ("dest",pure "")
+                        , ("webRoot",rootClause)
+                        ])
         ,("content",readClause "content.html" 
             [("sidebar", sidebarClause $ pageSidebar page)
             ,("content",return (pageContent page))

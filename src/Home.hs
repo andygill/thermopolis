@@ -3,8 +3,6 @@ module Main where
 
 import Control.Monad.Trans.Reader
 
-import qualified Config
-
 import Data.Char
 import Data.Monoid
 import qualified Data.Text as T

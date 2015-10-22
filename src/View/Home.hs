@@ -1,7 +1,6 @@
 {-# LANGUAGE OverloadedStrings, GADTs #-}
 module View.Home where
 
-import           Config
 import           Control.Applicative
 
 import           Data.Monoid
