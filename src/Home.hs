@@ -5,6 +5,7 @@ import Control.Monad.Trans.Reader
 
 import Data.Char
 import Data.Monoid
+import           Data.Text (Text)
 import qualified Data.Text as T
 
 import           Model.Assignment
@@ -33,26 +34,28 @@ checkAuthentication = do
         mAuth <- authType        
         case mAuth of
            Nothing -> outputInternalServerError ["no auth found"]
-           Just auth | map toLower auth == "basic" -> checkDB
+           Just auth | map toLower auth == "basic" -> checkUsername
            _       -> outputInternalServerError ["auth provided not understood"]
 
--- Next, check that we can open the database                   
-checkDB :: CGI CGIResult
-checkDB = do
-        db <- liftIO $ openDB
-        checkUsername db
-
--- Next, check that we have a user, and look up their basic info.
-checkUsername :: RemoteDevice -> CGI CGIResult
-checkUsername db = do
+-- Next, check that we have a user.
+checkUsername :: CGI CGIResult
+checkUsername = do
         mUser <- remoteUser        
         case mUser of
            Nothing -> outputInternalServerError ["no user found inside auth zone"]
-           Just user -> do
-                classes <- liftIO $ send db $ GetUserInfo (T.pack user)
+           Just user -> initDB (T.pack user)
+           
+-- Next, check that we can open the database, and find out what clsses we are in.
+initDB :: Text -> CGI CGIResult
+initDB username = do
+        optDB <- liftIO $ openDB username
+        case optDB of
+          Nothing -> outputInternalServerError ["error opening the database"]
+          Just db -> do -- and look up their basic info.
+                classes <- liftIO $ send db $ GetUserInfo
                 if null classes
                 then outputInternalServerError ["user is not in any classes"]
-                else checkPath db (User (T.pack user) classes)
+                else checkPath db (User username classes)
 
 checkPath :: RemoteDevice -> User -> CGI CGIResult
 checkPath db user = do
