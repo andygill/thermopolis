@@ -9,15 +9,18 @@ module Remote
 import Data.Text(Text)
 import Types
 import Control.Monad
-        
+
+
 type RemoteDevice = ()
 
 openDB :: IO RemoteDevice
 openDB = return ()
 
 data Remote :: * -> * where
-        GetUserInfo     :: Text ->                        Remote User
-        GetHomeworks    :: Class ->                        Remote [Int]
+        -- For a user, what classes are they in
+        GetUserInfo     :: Text ->                        Remote [Class]
+        -- For a class, what assignments are published
+        GetHomeworks    :: Class ->                       Remote [Assignment]
 
         Bind            :: Remote a -> (a -> Remote b) -> Remote b
         Return          :: a ->                           Remote a
@@ -25,10 +28,10 @@ data Remote :: * -> * where
 send ::  RemoteDevice -> Remote a -> IO a 
 send d (Bind m k) = send d m >>= send d . k
 send d (Return a) = return a
-send d (GetUserInfo "andy") = return $ User "andy" [EECS581,EECS776]
-send d (GetHomeworks EECS776) = return $ [1,2,3]
-send d (GetHomeworks EECS581) = return $ [1,2,3,4]
-send d (GetHomeworks EECS368) = return $ [1]
+send d (GetUserInfo "andy") = return $ [EECS581,EECS776]
+send d (GetHomeworks EECS776) = return $ [HW i | i <- [1..3]]
+send d (GetHomeworks EECS581) = return $ [HW i | i <- [1..4]]
+send d (GetHomeworks EECS368) = return $ [HW i | i <- [1..1]]
 
 instance Monad Remote where
     return = Return
@@ -40,4 +43,3 @@ instance Applicative Remote where
 
 instance Functor Remote where    
     fmap = ap . pure
-        

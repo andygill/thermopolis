@@ -5,6 +5,7 @@ import Data.Text(Text)
 import Data.Tree
 
 import Types
+import Remote
 
 -- Everything a Page needs, including sidebar options, etc.
 
@@ -25,5 +26,5 @@ mkSidebar usr =
         | cls <- userClasses usr
         ]
             
-mkPage :: User -> a -> Page a
-mkPage usr a = Page (userName usr) (mkSidebar usr) a
+mkPage :: User -> a -> Remote (Page a)
+mkPage usr a = return $ Page (userName usr) (mkSidebar usr) a

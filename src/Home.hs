@@ -9,6 +9,7 @@ import qualified Data.Text as T
 
 import           Model.Page
 import           Model.Home
+import           Model.Class
 
 import Network.CGI
 
@@ -17,6 +18,8 @@ import Web.Thermopolis.Clause
 import Remote
 import Types
 import Debug(cgiDebug)
+
+import           View.Class
 import           View.Home
 
 
@@ -44,10 +47,10 @@ checkUsername db = do
         case mUser of
            Nothing -> outputInternalServerError ["no user found inside auth zone"]
            Just user -> do
-                userInfo <- liftIO $ send db $ GetUserInfo (T.pack user)
-                if T.null (userName userInfo)
+                classes <- liftIO $ send db $ GetUserInfo (T.pack user)
+                if null classes
                 then outputInternalServerError ["user is not in any classes"]
-                else checkPath db userInfo
+                else checkPath db (User (T.pack user) classes)
 
 checkPath :: RemoteDevice -> User -> CGI CGIResult
 checkPath db user = do
@@ -60,8 +63,9 @@ generateAuthenticatedPage :: RemoteDevice -> User -> SmartPath -> CGI CGIResult
 generateAuthenticatedPage db user path = do
    hws <- liftIO $ send db $ sequence $ map GetHomeworks $ userClasses $ user
    case path of
-     Home -> do (liftIO $ mkHomePage user) >>= generate . homePage
-     _    -> outputInternalServerError ["bad path: " ++ show path]
+     Home          -> do (liftIO $ send db $ mkHomePage user)      >>= generate . homePageClause
+     AClass cls    -> do (liftIO $ send db $ mkClassPage user cls) >>=  generate . classPageClause
+     _             -> outputInternalServerError ["bad path: " ++ show path]
   where
     generate m = do
             -- This is where we encode that the authenticated service

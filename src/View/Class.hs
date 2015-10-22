@@ -1,13 +1,14 @@
 {-# LANGUAGE OverloadedStrings, GADTs #-}
-module View.Home where
+module View.Class where
 
 import           Control.Applicative
 
 import           Data.Monoid
 import           Data.String
 
-import           Model.Page
+import           Model.Class
 import           Model.Home
+import           Model.Page
 
 import           Web.Thermopolis.Clause
 
@@ -17,6 +18,5 @@ import           View.Page
 
 import           Web.Thermopolis.PageIdentity
 
-
-homePageClause :: (PageIdentity p f, p ~ SmartPath, ContentReader f) => Page HomeContent -> f Clause
-homePageClause page = pageClause $ (\ HomeContent -> "... HA! ...") <$> page
+classPageClause :: (PageIdentity p f, p ~ SmartPath, ContentReader f) => Page ClassContent -> f Clause
+classPageClause page = pageClause $ (\ ClassContent -> "... HA! HA HA...") <$> page
