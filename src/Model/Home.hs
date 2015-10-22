@@ -7,5 +7,5 @@ import Types
 -- The homepage is content free right now
 data HomeContent = HomeContent
 
-mkHomePage :: User -> Remote (Page HomeContent)
+mkHomePage :: User -> Remote k (Page HomeContent)
 mkHomePage user = mkPage user HomeContent

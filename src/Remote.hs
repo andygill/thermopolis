@@ -1,9 +1,10 @@
-{-# LANGUAGE OverloadedStrings, GADTs, KindSignatures #-}
+{-# LANGUAGE OverloadedStrings, GADTs, KindSignatures, DataKinds #-}
 module Remote 
   ( Remote(GetUserInfo,GetHomeworks)
   , RemoteDevice
   , send
-  , openDB
+  , openStudentDB
+  , Permission(..)
   ) where
 
 import Data.Text(Text)
@@ -11,21 +12,28 @@ import Types
 import Control.Monad
 
 
-type RemoteDevice = ()
+type RemoteDevice (k :: Permission) = ()
 
-openDB :: Text -> IO (Maybe RemoteDevice)
-openDB _ = return $ return ()
+openStudentDB :: Text -> IO (Maybe (RemoteDevice 'Student))
+openStudentDB _ = return $ return ()
 
-data Remote :: * -> * where
+data Permission
+  = Open
+  | Student
+  | Professor
+
+data Remote :: Permission -> * -> * where
         -- For a user, what classes are they in
-        GetUserInfo     ::                                Remote [Class]
+        GetUserInfo     ::                                Remote k [Class]
         -- For a class, what assignments are published
-        GetHomeworks    :: Class ->                       Remote [Assignment]
+        GetHomeworks    :: Class ->                       Remote k [Assignment]
 
-        Bind            :: Remote a -> (a -> Remote b) -> Remote b
-        Return          :: a ->                           Remote a
+        Become          :: Text -> Remote 'Student a -> Remote 'Professor a
 
-send ::  RemoteDevice -> Remote a -> IO a 
+        Bind            :: Remote k a -> (a -> Remote k b) -> Remote k b
+        Return          :: a ->                           Remote k a
+
+send ::  RemoteDevice k -> Remote k a -> IO a 
 send d (Bind m k) = send d m >>= send d . k
 send d (Return a) = return a
 send d (GetUserInfo) = return $ [EECS581,EECS776]
@@ -33,13 +41,13 @@ send d (GetHomeworks EECS776) = return $ [HW i | i <- [1..3]]
 send d (GetHomeworks EECS581) = return $ [HW i | i <- [1..4]]
 send d (GetHomeworks EECS368) = return $ [HW i | i <- [1..1]]
 
-instance Monad Remote where
+instance Monad (Remote k) where
     return = Return
     (>>=) = Bind
     
-instance Applicative Remote where    
+instance Applicative (Remote k) where    
     pure = Return
     (<*>) = ap
 
-instance Functor Remote where    
+instance Functor (Remote k) where    
     fmap = ap . pure

@@ -26,5 +26,5 @@ mkSidebar usr =
         | cls <- userClasses usr
         ]
             
-mkPage :: User -> a -> Remote (Page a)
+mkPage :: User -> a -> Remote k (Page a)
 mkPage usr a = return $ Page (userName usr) (mkSidebar usr) a

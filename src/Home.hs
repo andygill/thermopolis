@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, DataKinds #-}
 module Main where
 
 import Control.Monad.Trans.Reader
@@ -48,7 +48,7 @@ checkUsername = do
 -- Next, check that we can open the database, and find out what clsses we are in.
 initDB :: Text -> CGI CGIResult
 initDB username = do
-        optDB <- liftIO $ openDB username
+        optDB <- liftIO $ openStudentDB username
         case optDB of
           Nothing -> outputInternalServerError ["error opening the database"]
           Just db -> do -- and look up their basic info.
@@ -57,14 +57,14 @@ initDB username = do
                 then outputInternalServerError ["user is not in any classes"]
                 else checkPath db (User username classes)
 
-checkPath :: RemoteDevice -> User -> CGI CGIResult
+checkPath :: RemoteDevice 'Student -> User -> CGI CGIResult
 checkPath db user = do
         optPath <- getInput "path"
         case optPath >>= readSmartPath of
                  Nothing -> outputInternalServerError ["no valid path found"]
                  Just path -> generateAuthenticatedPage db user path
 
-generateAuthenticatedPage :: RemoteDevice -> User -> SmartPath -> CGI CGIResult
+generateAuthenticatedPage :: RemoteDevice 'Student -> User -> SmartPath -> CGI CGIResult
 generateAuthenticatedPage db user path = do
    hws <- liftIO $ send db $ sequence $ map GetHomeworks $ userClasses $ user
    case path of
