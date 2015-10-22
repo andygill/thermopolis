@@ -28,7 +28,14 @@ data Remote :: Permission -> * -> * where
         -- For a class, what assignments are published
         GetHomeworks    :: Class ->                       Remote k [Assignment]
 
-        Become          :: Text -> Remote 'Student a -> Remote 'Professor a
+
+        GetAssignment   :: Assignment ->                  Remote 'Student ()
+
+        -- scoped sudo for professor
+        Become          :: Text -> Remote 'Student a ->   Remote 'Professor a
+        -- Who is in a specific class
+        InClass         :: Class ->                       Remote 'Professor [Text]
+
 
         Bind            :: Remote k a -> (a -> Remote k b) -> Remote k b
         Return          :: a ->                           Remote k a

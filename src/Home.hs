@@ -43,11 +43,20 @@ checkUsername = do
         mUser <- remoteUser        
         case mUser of
            Nothing -> outputInternalServerError ["no user found inside auth zone"]
-           Just user -> initDB (T.pack user)
+           Just user -> checkPath (T.pack user)
            
+-- Next, check we have a valid path
+checkPath :: Text -> CGI CGIResult
+checkPath username = do
+        optPath <- getInput "path"
+        case optPath >>= readStudentPath of
+                 Nothing -> outputInternalServerError ["no valid path found"]
+                 Just path -> initDB username path
+
+
 -- Next, check that we can open the database, and find out what clsses we are in.
-initDB :: Text -> CGI CGIResult
-initDB username = do
+initDB :: Text -> StudentPath -> CGI CGIResult
+initDB username path = do
         optDB <- liftIO $ openStudentDB username
         case optDB of
           Nothing -> outputInternalServerError ["error opening the database"]
@@ -55,16 +64,9 @@ initDB username = do
                 classes <- liftIO $ send db $ GetUserInfo
                 if null classes
                 then outputInternalServerError ["user is not in any classes"]
-                else checkPath db (User username classes)
+                else generateAuthenticatedPage db (User username classes) path
 
-checkPath :: RemoteDevice 'Student -> User -> CGI CGIResult
-checkPath db user = do
-        optPath <- getInput "path"
-        case optPath >>= readSmartPath of
-                 Nothing -> outputInternalServerError ["no valid path found"]
-                 Just path -> generateAuthenticatedPage db user path
-
-generateAuthenticatedPage :: RemoteDevice 'Student -> User -> SmartPath -> CGI CGIResult
+generateAuthenticatedPage :: RemoteDevice 'Student -> User -> StudentPath -> CGI CGIResult
 generateAuthenticatedPage db user path = do
    hws <- liftIO $ send db $ sequence $ map GetHomeworks $ userClasses $ user
    case path of

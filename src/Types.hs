@@ -42,33 +42,41 @@ readAssignment xs | length xs > 2
                  = return $ HW $ read $ drop 2 $ xs
 readAssignment _ = fail "readAssignment"
 
-data SmartPath = Home
-               | AClass Class
-               | AAssignment Class Assignment
-        deriving (Eq, Ord, Read)
+data Path = StudentPath StudentPath
+          | AdminPath Text StudentPath    -- Access a student path 
 
-instance Show SmartPath where
+instance Show Path where
+  show (StudentPath path)     = show path
+  show (AdminPath user path)  = "~" ++ T.unpack user ++ "/" ++ show path
+
+data StudentPath 
+    = Home
+    | AClass Class
+    | AAssignment Class Assignment
+  deriving (Eq, Ord, Read)
+
+instance Show StudentPath where
   show Home                  = "home/"
   show (AClass cls)          = "home/" ++ show cls
   show (AAssignment cls ass) = "home/" ++ show cls ++ "/" ++ show ass
 
-readSmartPath :: String -> Maybe SmartPath
-readSmartPath p = case words (map slash p) of
+readStudentPath :: String -> Maybe StudentPath
+readStudentPath p = case words (map slash p) of
    [] -> Just Home
    [cls] -> fmap AClass $ readClass cls
    [cls,ass] -> AAssignment <$> readClass cls
                             <*> readAssignment ass
-   _ -> fail "readSmartPath failed"
+   _ -> fail "readStudentPath failed"
   where slash '/' = ' '
         slash c   = c
 
-smartPathDepth :: SmartPath -> Int
-smartPathDepth (Home)            = 1
-smartPathDepth (AClass _)        = 1
-smartPathDepth (AAssignment _ _) = 2
+studentPathDepth :: StudentPath -> Int
+studentPathDepth (Home)            = 1
+studentPathDepth (AClass _)        = 1
+studentPathDepth (AAssignment _ _) = 2
 
-instance Depth SmartPath where
-  depth = smartPathDepth
+instance Depth StudentPath where
+  depth = studentPathDepth
 
 ----------------------------------------------------
 {-
@@ -81,7 +89,7 @@ instance PageIdentity () IO where
    pageDepth = return 0
    
    
-instance Monad f => PageIdentity SmartPath (ReaderT SmartPath f) where
+instance Monad f => PageIdentity StudentPath (ReaderT StudentPath f) where
    self p = (== p) <$> ask
-   pageDepth = smartPathDepth <$> ask
+   pageDepth = StudentPathDepth <$> ask
 -}        
