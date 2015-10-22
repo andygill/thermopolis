@@ -10,9 +10,10 @@ welcomePage :: (PageIdentity _p f, ContentReader f) => f Clause
 welcomePage = do
  readClause "index.html" $
         [("who",    return "Thermopolis")
+        ,("title",pure "Thermopolis")
         ,("menu",   readClause "right-button.html" 
                         [ ("label",pure "Sign in")
-                        , ("dest",pure "root/")
+                        , ("dest",pure "home/")
                         , ("webRoot",rootClause)
                         ])
         ,("content",readClause "welcome.html" [])

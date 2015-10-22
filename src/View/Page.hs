@@ -25,6 +25,7 @@ pageClause page = do
  menu <- readClause "menu.html" []
  readClause "index.html"
         [("webRoot",rootClause)
+        ,("title",pure "Thermopolis")
         ,("who",return $ ("Logged In as " <> textToClause (pageUser page)))
         ,("menu", readClause "right-button.html" 
                         [ ("label",pure "Sign Out")

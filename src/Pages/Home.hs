@@ -26,6 +26,7 @@ homePage home = do
  menu <- readClause "menu.html" []
  readClause "index.html"
         [("webRoot",rootClause)
+        ,("title",pure "Thermopolis")
         ,("who",return $ ("Logged In as " <> fromString (show (user home))))
         ,("menu",readClause "menu.html" [])
         ,("content",readClause "content.html" 
