@@ -7,6 +7,7 @@ import Data.Char
 import Data.Monoid
 import qualified Data.Text as T
 
+import           Model.Assignment
 import           Model.Page
 import           Model.Home
 import           Model.Class
@@ -19,6 +20,7 @@ import Remote
 import Types
 import Debug(cgiDebug)
 
+import           View.Assignment
 import           View.Class
 import           View.Home
 
@@ -63,8 +65,11 @@ generateAuthenticatedPage :: RemoteDevice -> User -> SmartPath -> CGI CGIResult
 generateAuthenticatedPage db user path = do
    hws <- liftIO $ send db $ sequence $ map GetHomeworks $ userClasses $ user
    case path of
-     Home          -> do (liftIO $ send db $ mkHomePage user)      >>= generate . homePageClause
-     AClass cls    -> do (liftIO $ send db $ mkClassPage user cls) >>=  generate . classPageClause
+     Home          -> (liftIO $ send db $ mkHomePage user)      >>= generate . homePageClause
+     AClass cls    -> (liftIO $ send db $ mkClassPage user cls) >>=  generate . classPageClause
+     AAssignment cls ass 
+                   -> (liftIO $ send db $ mkAssignmentPage user cls ass) 
+                           >>=  generate . assignmentPageClause
      _             -> outputInternalServerError ["bad path: " ++ show path]
   where
     generate m = do
