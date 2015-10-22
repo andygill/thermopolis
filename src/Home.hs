@@ -62,8 +62,8 @@ generateAuthenticatedPage :: RemoteDevice -> User -> SmartPath -> CGI CGIResult
 generateAuthenticatedPage db user path = do
    hws <- liftIO $ send db $ sequence $ map GetHomeworks $ userClasses $ user
    case path of
-     _ -> generate $ homePage (mkPage user HomeContent)
---  _ -> outputInternalServerError ["bad path: " ++ show path]
+     Home -> do (liftIO $ mkHomePage user) >>= generate . homePage
+     _    -> outputInternalServerError ["bad path: " ++ show path]
   where
     generate m = do
             -- This is where we encode that the authenticated service
@@ -71,50 +71,3 @@ generateAuthenticatedPage db user path = do
             -- from home down, is authenticated.
             p <- liftIO $ runReaderT m path
             outputClause p            
-{-
-
-
-         case path of
-                 []          -> generateHomePage path user
-                 [class']    -> generateClassPage path user
-                 [class',hw] -> generateHomeworkPage path user                         
-                 _          -> outputInternalServerError ["misformed path"]
-
-
-generateHomePage :: User -> CGI CGIResult
-generateHomePage user = do
-    p <- liftIO $ homePage (mkView ["home"] (HomePage user (Classes [("EECS 776",3),("EECS 581",4)])))
---                           (PageInfo.PageInfo Config.config ("home/" <> T.pack path))
-    outputClause p        
-  where path = ""
-
-generateClassPage :: User -> CGI CGIResult
-generateClassPage = generateHomePage
-
-generateHomeworkPage :: User -> CGI CGIResult
-generateHomeworkPage = generateHomePage
--}
-
-{-
-cgiMain :: CGI CGIResult
-cgiMain = do
-        -- If this page is served, there better be a remoteUser
-        mAuth <- authType
-        mUser <- remoteUser
-        path <- getInput "path"
-        main2 mAuth mUser (normalize path)
-  where
-        normalize Nothing  = ""
-        normalize (Just p) = reverse $ f $ reverse $ p
-          where f ('/':cs) = f cs
-                f cs       = cs
-
-main2 :: Maybe String -> Maybe String -> String -> CGI CGIResult
-main2 Nothing _ _ = outputInternalServerError ["no auth found"]
-main2 _ Nothing _ = outputInternalServerError ["no user found inside auth zone"]
-main2 (Just auth) (Just user) path | map toLower auth == "basic" = do
-    p <- liftIO $ runPageM (homePage (HomePage (User (T.pack user) ["EECS776"]) (Classes [("EECS 776",3),("EECS 581",4)])))
-                           (PageInfo.PageInfo Config.config ("home/" <> T.pack path))
-    outputPage p
-main2 _ _ _ = outputInternalServerError ["auth provided not understood"]
--}
