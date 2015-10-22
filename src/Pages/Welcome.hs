@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Pages.Welcome where
 
-import           Pages.Utils
+import           Web.Thermopolis.Clause
 import           Types
 import           Web.Thermopolis.PageIdentity
 

@@ -1,6 +1,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving, StandaloneDeriving, OverloadedStrings, TypeOperators, KindSignatures, GADTs, MultiParamTypeClasses, ScopedTypeVariables, StandaloneDeriving #-}
 
-module Pages.Utils where
+module Web.Thermopolis.Clause where
 
 import		 Control.Applicative
 import           Control.Monad.Trans.Reader
@@ -24,7 +24,7 @@ import           Data.List(intersperse)
 import qualified Data.Text as T
 
 import           Web.Thermopolis.PageIdentity
-
+{-
 class (Applicative f, Monad f) => ContentReader f where 
  readFileC :: FilePath -> f Clause     -- ^ tell me how to load a static file
  webRootC  :: f Text
@@ -130,11 +130,6 @@ readClause filePath env = do
 textToClause :: Text -> Clause
 textToClause = LT.fromStrict 
 
--- A 'Path' is a list of (virtual) directories. A non-empty 'Path'
--- is always terminated with a "/".
-pathToClause :: Path -> Clause
-pathToClause = textToClause . T.concat . map (<> "/")
-
 -- We output with UTF-8.
 outputClause :: MonadCGI m => Clause -> m CGIResult
 outputClause = outputFPS . encodeUtf8 
@@ -153,3 +148,4 @@ infixl 4 <+>
 rootClause :: (Functor f, PageIdentity p f) => f Clause
 rootClause = textToClause <$> root
  
+-}

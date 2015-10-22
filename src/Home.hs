@@ -14,7 +14,7 @@ import           Model.Home
 
 import Network.CGI
 
-import Pages.Utils
+import Web.Thermopolis.Clause
 
 import Remote
 import Types

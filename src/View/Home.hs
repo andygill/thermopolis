@@ -10,7 +10,7 @@ import           Data.String
 import           Model.Page
 import           Model.Home
 
-import           Pages.Utils
+import           Web.Thermopolis.Clause
 
 import           Types
 

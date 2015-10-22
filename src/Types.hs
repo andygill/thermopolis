@@ -15,10 +15,6 @@ data User = User
         , userClasses :: [Class]
         } deriving Show
 
-
--- 'Path' is a list of 'Text' of the absolute path for a specific webpage, from our root.
-type Path = [Text]
-
 data Class = EECS368 | EECS581 | EECS776
         deriving (Eq, Ord, Show, Read)
 

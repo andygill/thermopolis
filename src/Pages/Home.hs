@@ -8,7 +8,7 @@ import           Data.Monoid
 import           Data.String
 
 import           Pages.Sidebar (Sidebar, sidebarClause)
-import           Pages.Utils
+import           Web.Thermopolis.Clause
 
 import           Types
 import           View

@@ -7,7 +7,7 @@ import qualified Config
 
 import Network.CGI
 
-import Pages.Utils
+import Web.Thermopolis.Clause
 import Pages.Welcome
 import Debug(cgiDebug)
 

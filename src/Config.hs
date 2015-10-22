@@ -2,7 +2,7 @@
 module Config where
 
 import Data.Text
-import Pages.Utils -- (BaseEnv(..))
+import Web.Thermopolis.Clause -- (BaseEnv(..))
 
 -- The config is compile-time static information.
 
