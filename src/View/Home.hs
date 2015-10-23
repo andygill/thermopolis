@@ -18,5 +18,5 @@ import           View.Page
 import           Web.Thermopolis.PageIdentity
 
 
-homePageClause :: (PageIdentity p f, p ~ StudentPath, ContentReader f) => Page HomeContent -> f Clause
+homePageClause :: (PageIdentity p f, p ~ Path, ContentReader f) => Page HomeContent -> f Clause
 homePageClause page = pageClause $ (\ HomeContent -> "... HA! ...") <$> page

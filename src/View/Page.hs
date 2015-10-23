@@ -20,7 +20,7 @@ import           Data.Text(Text)
 import qualified Data.Text as T
 
 
-pageClause :: (PageIdentity p f, p ~ StudentPath, ContentReader f) => Page Clause -> f Clause
+pageClause :: (PageIdentity p f, p ~ Path, ContentReader f) => Page Clause -> f Clause
 pageClause page = do
  menu <- readClause "menu.html" []
  readClause "index.html"
@@ -40,10 +40,10 @@ pageClause page = do
 
 
 
-sidebarClause :: forall p f . (PageIdentity p f, p ~ StudentPath, ContentReader f) => Forest p -> f Clause
+sidebarClause :: forall p f . (PageIdentity p f, p ~ Path, ContentReader f) => Forest p -> f Clause
 sidebarClause items = readClause "sidebar.html" [ ("content", mconcat <$> sequenceA (map (sideItem 0) items)) ]
   where
-          sideItem :: StudentPath ~ p => Int -> Tree p -> f Clause
+          sideItem :: Path ~ p => Int -> Tree p -> f Clause
           sideItem d item = sideLink (rootLabel item) 
                              (spacing d <+> labelPath (rootLabel item))
                      <+> (mconcat <$> sequenceA (fmap (sideItem (d+1)) (subForest item)))
@@ -53,7 +53,7 @@ sidebarClause items = readClause "sidebar.html" [ ("content", mconcat <$> sequen
 --  = Classes [(Class,Int)]        -- classname and number of homeworks
 
 {-
-sidebarClause :: (PageIdentity p f, p ~ StudentPath,      ContentReader f) => Sidebar -> f Clause
+sidebarClause :: (PageIdentity p f, p ~ Path,      ContentReader f) => Sidebar -> f Clause
 sidebarClause sidebar = readClause "sidebar.html" 
     [      ("content",mconcat <$> sequenceA
                   ([ sideLink (Home)
@@ -85,10 +85,13 @@ sideLink path content = readClause "sidelink.html"
                    , ("content",content)
                    ]
 
-labelPath :: (Monad f, ContentReader f) => StudentPath -> f Clause
-labelPath Home                     = glyphicon "home" <+> nbsp <+> pure "Home"
-labelPath (AClass cls)             = glyphicon "education" <+> nbsp <+> pure (fromString (show cls))
-labelPath (AAssignment cls (HW i)) = glyphicon "warning-sign" <+> nbsp <+> pure "Homework" <+> nbsp <+> pure (fromString (show i))
+labelPath :: (Monad f, ContentReader f) => Path -> f Clause
+labelPath (StudentPath path)       = labelStudentPath path
+
+labelStudentPath :: (Monad f, ContentReader f) => StudentPath -> f Clause
+labelStudentPath Home                     = glyphicon "home" <+> nbsp <+> pure "Home"
+labelStudentPath (AClass cls)             = glyphicon "education" <+> nbsp <+> pure (fromString (show cls))
+labelStudentPath (AAssignment cls (HW i)) = glyphicon "warning-sign" <+> nbsp <+> pure "Homework" <+> nbsp <+> pure (fromString (show i))
 
 active :: (Eq p, Functor f, PageIdentity p f) => p -> f Clause
 active p = (\ s -> if s == p then "active" else "") <$> self

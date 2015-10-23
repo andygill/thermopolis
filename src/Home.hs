@@ -49,13 +49,14 @@ checkUsername = do
 checkPath :: Text -> CGI CGIResult
 checkPath username = do
         optPath <- getInput "path"
-        case optPath >>= readStudentPath of
-                 Nothing -> outputInternalServerError ["no valid path found"]
+        -- Here, we encode the fact that we are inside a sub-directory for authentication
+        case optPath >>= readPath . ("home/" ++) of
+                 Nothing -> outputInternalServerError ["no valid path found:" ++ show optPath]
                  Just path -> initDB username path
 
 
 -- Next, check that we can open the database, and find out what clsses we are in.
-initDB :: Text -> StudentPath -> CGI CGIResult
+initDB :: Text -> Path -> CGI CGIResult
 initDB username path = do
         optDB <- liftIO $ openStudentDB username
         case optDB of
@@ -66,13 +67,13 @@ initDB username path = do
                 then outputInternalServerError ["user is not in any classes"]
                 else generateAuthenticatedPage db (User username classes) path
 
-generateAuthenticatedPage :: RemoteDevice 'Student -> User -> StudentPath -> CGI CGIResult
+generateAuthenticatedPage :: RemoteDevice 'Student -> User -> Path -> CGI CGIResult
 generateAuthenticatedPage db user path = do
    hws <- liftIO $ send db $ sequence $ map GetHomeworks $ userClasses $ user
    case path of
-     Home          -> (liftIO $ send db $ mkHomePage user)      >>= generate . homePageClause
-     AClass cls    -> (liftIO $ send db $ mkClassPage user cls) >>=  generate . classPageClause
-     AAssignment cls ass 
+     StudentPath (Home)          -> (liftIO $ send db $ mkHomePage user)      >>= generate . homePageClause
+     StudentPath (AClass cls)   -> (liftIO $ send db $ mkClassPage user cls) >>=  generate . classPageClause
+     StudentPath (AAssignment cls ass)
                    -> (liftIO $ send db $ mkAssignmentPage user cls ass) 
                            >>=  generate . assignmentPageClause
      _             -> outputInternalServerError ["bad path: " ++ show path]

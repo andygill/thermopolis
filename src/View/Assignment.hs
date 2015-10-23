@@ -17,5 +17,5 @@ import           View.Page
 
 import           Web.Thermopolis.PageIdentity
 
-assignmentPageClause :: (PageIdentity p f, p ~ StudentPath, ContentReader f) => Page AssignmentContent -> f Clause
+assignmentPageClause :: (PageIdentity p f, p ~ Path, ContentReader f) => Page AssignmentContent -> f Clause
 assignmentPageClause page = pageClause $ (\ AssignmentContent -> "... homework..") <$> page

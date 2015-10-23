@@ -11,12 +11,12 @@ import Remote
 
 data Page a = Page
   { pageUser    :: Text
-  , pageSidebar :: Forest StudentPath
+  , pageSidebar :: Forest Path
   , pageContent :: a
   } deriving Functor
   
-mkSidebar :: User -> Forest StudentPath
-mkSidebar usr = 
+mkSidebar :: User -> Forest Path
+mkSidebar usr = fmap (fmap StudentPath) $
         [ pure Home 
         ] ++
         [ Node (AClass cls) 
