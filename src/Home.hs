@@ -50,7 +50,7 @@ checkPath :: Text -> CGI CGIResult
 checkPath username = do
         optPath <- getInput "path"
         -- Here, we encode the fact that we are inside a sub-directory for authentication
-        case optPath >>= readPath . ("home/" ++) of
+        case optPath >>= readPath of
                  Nothing -> outputInternalServerError ["no valid path found:" ++ show optPath]
                  Just path -> initDB username path
 
