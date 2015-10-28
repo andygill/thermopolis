@@ -8,9 +8,10 @@ module Remote
   ) where
 
 import Data.Text(Text)
-import Types
 import Control.Monad
 
+import Types
+import Question
 
 type RemoteDevice (k :: Permission) = ()
 
@@ -27,6 +28,8 @@ data Remote :: Permission -> * -> * where
         GetUserInfo     ::                                Remote k [Class]
         -- For a class, what assignments are published
         GetHomeworks    :: Class ->                       Remote k [Assignment]
+        -- For a specific homework, get the template
+        GetHomework     :: Class -> Assignment ->         Remote k [Question]
 
 
         GetAssignment   :: Assignment ->                  Remote 'Student ()
