@@ -1,6 +1,6 @@
-{-# LANGUAGE OverloadedStrings, GADTs, KindSignatures, DataKinds #-}
+{-# LANGUAGE OverloadedStrings, GADTs, KindSignatures, DataKinds, StandaloneDeriving #-}
 module Remote 
-  ( Remote(GetUserInfo,GetHomeworks)
+  ( Remote(GetUserInfo,GetHomeworks,GetHomework)
   , RemoteDevice
   , send
   , openStudentDB
@@ -50,6 +50,8 @@ send d (GetUserInfo) = return $ [EECS581,EECS776]
 send d (GetHomeworks EECS776) = return $ [HW i | i <- [1..3]]
 send d (GetHomeworks EECS581) = return $ [HW i | i <- [1..4]]
 send d (GetHomeworks EECS368) = return $ [HW i | i <- [1..1]]
+send d (GetHomework EECS776 (HW 1)) = return $ [ Prose "Hello, World!" ]
+send d (GetHomework cls ass) = return $ error (show ("GetHomework" :: String,cls,ass))
 
 instance Monad (Remote k) where
     return = Return

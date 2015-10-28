@@ -15,7 +15,7 @@ data Question
 
 requestClause :: (ContentReader f) => Question -> f Clause
 requestClause (Prose cls) = 
-        readClause "<p>${content}</p>"
+        substClause "<p>${content}</p>"
                 [ ("content",pure cls)
                 ]
 requestClause (Header h cls) =
