@@ -57,7 +57,10 @@ substClause f env = substituteA f context
 
 textToClause :: Text -> Clause
 textToClause = LT.concatMap toCER . LT.fromStrict 
-  where toCER c | c == '&'  = "&amb"
+  where toCER c | c == '&'  = "&amb;"
+                | c == '"'  = "&quot;"
+                | c == '<'  = "&lt;"
+                | c == '>'  = "&gt;"
                 | isAscii c = LT.pack [c]
                 | otherwise = "&#" <> LT.pack (show (ord c)) <> ";"
 
